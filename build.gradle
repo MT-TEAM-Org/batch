@@ -38,7 +38,7 @@ dependencies {
 
 
     // mysql-connector 추가
-//    implementation group: 'com.mysql', name: 'mysql-connector-j', version: '8.3.0'
+    implementation group: 'com.mysql', name: 'mysql-connector-j', version: '8.3.0'
 
     implementation group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '4.27.0'
 }
