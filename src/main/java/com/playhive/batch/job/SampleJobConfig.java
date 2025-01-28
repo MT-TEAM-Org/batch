@@ -31,15 +31,15 @@ public class SampleJobConfig {
 	}
 
 	@Bean
-	public Step sampleCalendarStep(JobRepository jobRepository, Tasklet tasklet,
+	public Step sampleCalendarStep(JobRepository jobRepository, Tasklet sampleTasklet,
 		PlatformTransactionManager transactionManager) {
 		return new StepBuilder(SAMPLE_STEP_NAME, jobRepository)
-			.tasklet(tasklet, transactionManager)
+			.tasklet(sampleTasklet, transactionManager)
 			.build();
 	}
 
 	@Bean
-	public Tasklet tasklet() {
+	public Tasklet sampleTasklet() {
 		return ((contribution, chunkContext) -> {
 			System.out.println("sampleStep Run Complete");
 			return RepeatStatus.FINISHED;
