@@ -1,7 +1,7 @@
 spring:
   batch:
     job:
-      name: footballCalendarJob
+      name: newsCrawlJob
       enabled: false
     jdbc:
       initialize-schema: never
