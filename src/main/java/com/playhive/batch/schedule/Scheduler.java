@@ -19,21 +19,21 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class Scheduler {
 
-	private final Job sampleJob;
+	private final Job newsCrawlJob;
 	private final JobLauncher jobLauncher;
 
-	@Scheduled(cron = "*/5 * * * * *") // 매 5초마다 실행
-	public void sampleJob() throws
+	@Scheduled(cron = "0 0 6 * * *") // 매일 오전 6시 0분 0초에 실행
+	public void newsCrawlJob() throws
 		JobInstanceAlreadyCompleteException,
 		JobExecutionAlreadyRunningException,
 		JobParametersInvalidException,
 		JobRestartException {
 
 		JobParameters jobParameters = new JobParametersBuilder()
-			.addDate("date", new Date()) // 현재 날짜 및 시간을 파라미터로 추가
-			.addLong("time", System.currentTimeMillis()) // 고유한 Long 파라미터 추가
+			.addDate("date", new Date())
+			.addLong("time", System.currentTimeMillis())
 			.toJobParameters();
 
-		this.jobLauncher.run(sampleJob, jobParameters);
+		this.jobLauncher.run(newsCrawlJob, jobParameters);
 	}
 }
