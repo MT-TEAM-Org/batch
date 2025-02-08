@@ -7,9 +7,9 @@ spring:
       initialize-schema: never
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://play-hive.c5s6w4e2ehz8.ap-northeast-2.rds.amazonaws.com:3306/playhive?useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://${DB_ENDPOINT}:3306/${DB_NAME}?useSSL=false&serverTimezone=UTC
     username: playhive
-    password: Play!2345
+    password: ${DB_PASSWORD}
 
 
   jpa:
