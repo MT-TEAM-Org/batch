@@ -12,23 +12,24 @@ public class WebDriverConfig {
 	@Bean
 	public WebDriver webDriver() {
 		ChromeOptions options = new ChromeOptions();
+		// 헤드리스 모드 설정: 브라우저 UI 없이 실행
 		options.addArguments("--headless");
+
+		// Linux 환경에서 Chrome을 사용할 때 문제가 발생할 수 있는 사항을 우회
 		options.addArguments("--no-sandbox");
+
+		// /dev/shm이 접근할 수 없을 때의 문제를 피하기 위한 설정
 		options.addArguments("--disable-dev-shm-usage");
+
+		// GPU 사용 비활성화: 리소스 절약을 위해 GPU 가속을 사용하지 않음
 		options.addArguments("--disable-gpu");
+
+		// SSL 오류 무시 설정: SSL 인증서를 무시하고 브라우저를 실행
 		options.addArguments("--ignore-ssl-errors=yes");
+
+		// 인증서 오류 무시 설정: 모든 인증서 오류를 무시하고 브라우저를 실행
 		options.addArguments("--ignore-certificate-errors");
-		// 운영체제에 따른 ChromeDriver 경로 설정
-		// String os = System.getProperty("os.name").toLowerCase();
-		// String chromeDriverPath;
-		//
-		// if (os.contains("win") || os.contains("mac")) {
-		// 	chromeDriverPath = "./driver/chromedriver"; // Windows 경로
-		// } else { // Linux 포함
-		// 	chromeDriverPath = "/play-hive-batch/chromedriver"; // Linux 경로
-		// }
-		//
-		// System.setProperty("webdriver.chrome.driver", chromeDriverPath);
+
 		return new ChromeDriver(options);
 	}
 }
