@@ -83,6 +83,9 @@ jobs:
           username: ${{ secrets.PERSONAL_SERVER_USERNAME }}
           password: ${{ secrets.PERSONAL_SERVER_PASSWORD }}
           script: |
+            # root로 전환
+            echo "${{ secrets.PERSONAL_SERVER_PASSWORD }}" | sudo -S su
+            
             # 이동할 디렉토리 설정
             DEPLOY_DIR=~/play-hive-batch
 
@@ -106,7 +109,7 @@ jobs:
             # Docker Compose 설치 여부 확인
             if ! docker-compose --version &>/dev/null; then
               echo "Docker Compose is not installed. Installing Docker Compose..."
-              echo "${{ secrets.PERSONAL_SERVER_PASSWORD }}" | sudo -S apt-get update
+              sudo apt-get update
               sudo apt-get install -y docker-compose
             else
               echo "Docker Compose is already installed."
