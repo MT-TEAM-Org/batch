@@ -12,11 +12,12 @@ public class WebDriverConfig {
 	@Bean
 	public WebDriver webDriver() {
 		ChromeOptions options = new ChromeOptions();
-		options.addArguments("--headless=new");
+		options.addArguments("--headless");
 		options.addArguments("--no-sandbox");
 		options.addArguments("--disable-dev-shm-usage");
 		options.addArguments("--disable-gpu");
-		options.setCapability("ignoreProtectedModeSettings", true);
+		options.addArguments("--ignore-ssl-errors=yes");
+		options.addArguments("--ignore-certificate-errors");
 		// 운영체제에 따른 ChromeDriver 경로 설정
 		String os = System.getProperty("os.name").toLowerCase();
 		String chromeDriverPath;
