@@ -91,7 +91,7 @@ public class FootballNewsCrawler implements Crawler {
 	//뉴스 타이틀가져오기
 	private String getTitle(WebElement news) {
 		return news.findElement(By.className(TITLE_CLASS)).findElement(By.tagName(SPAN_TAG)).getText();
-	}
+	} 
 
 	//썸네일 이미지 가져오기, 없으면 null
 	private String getThumbImg(WebElement news) {
