@@ -79,9 +79,9 @@ jobs:
       - name: Deploy to AWS and Restart Services with Docker Compose
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ secrets.AWS_SERVER_IP }}
-          username: ${{ secrets.AWS_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.PERSONAL_SERVER_IP }}
+          username: ${{ secrets.PERSONAL_SERVER_USERNAME }}
+          password: ${{ secrets.PERSONAL_SERVER_PASSWORD }}
           script: |
             # 이동할 디렉토리 설정
             DEPLOY_DIR=~/play-hive-batch
