@@ -1,6 +1,9 @@
 # Step 1: 애플리케이션 빌드
 FROM openjdk:17-jdk-slim AS builder
 
+# 필수 패키지 설치
+RUN apt-get update && apt-get install -y wget curl unzip
+
 # 작업 디렉토리 설정
 WORKDIR /app
 
