@@ -12,8 +12,11 @@ public class WebDriverConfig {
 	@Bean
 	public WebDriver webDriver() {
 		ChromeOptions options = new ChromeOptions();
-		options.setCapability("browserVersion", "116.0.5845.111");
-		options.addArguments("--headless"); // 헤드리스 모드
+		options.addArguments("--headless=new");
+		options.addArguments("--no-sandbox");
+		options.addArguments("--disable-dev-shm-usage");
+		options.addArguments("--disable-gpu");
+		options.setCapability("ignoreProtectedModeSettings", true);
 		// 운영체제에 따른 ChromeDriver 경로 설정
 		String os = System.getProperty("os.name").toLowerCase();
 		String chromeDriverPath;
