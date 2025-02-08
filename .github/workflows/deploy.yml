@@ -32,9 +32,9 @@ jobs:
       - name: Copy docker-compose.yml to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ secrets.AWS_SERVER_IP }}
-          username: ${{ secrets.AWS_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.PERSONAL_SERVER_IP }}
+          username: ${{ secrets.PERSONAL_SERVER_USERNAME }}
+          password: ${{ secrets.PERSONAL_SERVER_PASSWORD }}
           source: ./docker-compose.yml
           target: ~/play-hive-batch/
           
