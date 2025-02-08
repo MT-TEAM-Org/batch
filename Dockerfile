@@ -31,7 +31,6 @@ WORKDIR /play-hive-batch
 
 # 빌드 단계에서 생성된 JAR 파일 복사
 COPY --from=builder /app/build/libs/*.jar app.jar
-COPY /driver/chromedriver chromedriver
 
 # 필수 패키지 설치 (wget 및 Chrome 설치)
 RUN apt-get update && \
