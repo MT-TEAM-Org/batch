@@ -30,6 +30,14 @@ WORKDIR /play-hive-batch
 COPY --from=builder /app/build/libs/*.jar app.jar
 COPY /driver/chromedriver chromedriver
 
+# 크롬 설치
+RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+RUN apt-get install -y ./google-chrome-stable_current_amd64.deb
+RUN rm ./google-chrome-stable_current_amd64.deb
+
+# 크롬 버전 확인
+RUN google-chrome --version
+
 # 애플리케이션이 사용할 포트 노출
 EXPOSE 8081
 
