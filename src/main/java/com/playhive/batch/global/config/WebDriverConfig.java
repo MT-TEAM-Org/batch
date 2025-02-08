@@ -21,7 +21,7 @@ public class WebDriverConfig {
 		if (os.contains("win") || os.contains("mac")) {
 			chromeDriverPath = "./driver/chromedriver"; // Windows 경로
 		} else { // Linux 포함
-			chromeDriverPath = "/home/tkdrl8908/play-hive-batch/chromedriver"; // Linux 경로
+			chromeDriverPath = "/play-hive-batch/chromedriver"; // Linux 경로
 		}
 
 		System.setProperty("webdriver.chrome.driver", chromeDriverPath);
