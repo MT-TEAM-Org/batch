@@ -106,6 +106,7 @@ jobs:
             # Docker Compose 설치 여부 확인
             if ! docker-compose --version &>/dev/null; then
               echo "Docker Compose is not installed. Installing Docker Compose..."
+              echo "${{ secrets.PERSONAL_SERVER_PASSWORD }}"
               sudo apt-get update
               sudo apt-get install -y docker-compose
             else
