@@ -33,10 +33,12 @@ WORKDIR /play-hive-batch
 COPY --from=builder /app/build/libs/*.jar app.jar
 COPY /driver/chromedriver chromedriver
 
-# 크롬 설치
-RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-RUN apt-get install -y ./google-chrome-stable_current_amd64.deb
-RUN rm ./google-chrome-stable_current_amd64.deb
+# 필수 패키지 설치 (wget 및 Chrome 설치)
+RUN apt-get update && \
+    apt-get install -y wget && \
+    wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
+    apt-get install -y ./google-chrome-stable_current_amd64.deb && \
+    rm ./google-chrome-stable_current_amd64.deb
 
 # 크롬 버전 확인
 RUN google-chrome --version
