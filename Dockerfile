@@ -46,4 +46,4 @@ RUN google-chrome --version
 EXPOSE 8081
 
 # 애플리케이션 실행 명령
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Duser.timezone=GMT+09:00", "-jar", "app.jar"]
