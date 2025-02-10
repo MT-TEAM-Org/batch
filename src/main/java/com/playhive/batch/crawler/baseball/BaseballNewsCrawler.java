@@ -1,4 +1,4 @@
-package com.playhive.batch.crawler.football;
+package com.playhive.batch.crawler.baseball;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,9 +21,9 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class FootballNewsCrawler implements Crawler {
+public class BaseballNewsCrawler implements Crawler {
 
-	private static final String URL = "https://sports.news.naver.com/wfootball/news/index?isphoto=N";
+	private static final String URL = "https://sports.news.naver.com/kbaseball/news/index?isphoto=N";
 
 	private static final String DATE_FIELD = "&date";
 	private static final String EQUALS = "=";
@@ -75,7 +75,7 @@ public class FootballNewsCrawler implements Crawler {
 	}
 
 	private void saveNews(String title, String thumbImg, LocalDateTime postDate) {
-		this.newsService.saveNews(NewsSaveRequest.createFootballRequest(title, thumbImg, postDate));
+		this.newsService.saveNews(NewsSaveRequest.createBaseballRequest(title, thumbImg, postDate));
 	}
 
 	private List<WebElement> getNewsList() {
