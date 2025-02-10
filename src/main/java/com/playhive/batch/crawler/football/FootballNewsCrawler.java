@@ -13,6 +13,8 @@ import org.openqa.selenium.WebElement;
 
 import com.playhive.batch.crawler.Crawler;
 import com.playhive.batch.news.dto.NewsSaveRequest;
+import com.playhive.batch.news.entity.News;
+import com.playhive.batch.news.service.NewsCountService;
 import com.playhive.batch.news.service.NewsService;
 
 import lombok.RequiredArgsConstructor;
@@ -42,6 +44,7 @@ public class FootballNewsCrawler implements Crawler {
 
 	private final WebDriver webDriver;
 	private final NewsService newsService;
+	private final NewsCountService newsCountService;
 
 	@Override
 	public void crawl() {
@@ -75,7 +78,8 @@ public class FootballNewsCrawler implements Crawler {
 	}
 
 	private void saveNews(String title, String thumbImg, LocalDateTime postDate) {
-		this.newsService.saveNews(NewsSaveRequest.createFootballRequest(title, thumbImg, postDate));
+		News news = this.newsService.saveNews(NewsSaveRequest.createFootballRequest(title, thumbImg, postDate));
+		this.newsCountService.saveNewsCount(news);
 	}
 
 	private List<WebElement> getNewsList() {
