@@ -17,6 +17,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import com.playhive.batch.crawler.Crawler;
 import com.playhive.batch.crawler.football.FootballNewsCrawler;
 import com.playhive.batch.job.listener.JobLoggerListener;
+import com.playhive.batch.news.entity.NewsCount;
+import com.playhive.batch.news.service.NewsCountService;
 import com.playhive.batch.news.service.NewsService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ public class NewsCrawlJobConfig {
 
 	private final WebDriver webDriver;
 	private final NewsService newsService;
+	private final NewsCountService newsCountService;
 
 	@Bean
 	public Job newsCrawlJob(JobRepository jobRepository, Step newsCrawlStep) {
@@ -50,7 +53,7 @@ public class NewsCrawlJobConfig {
 	@Bean
 	public Tasklet newsTasklet() {
 		return (contribution, chunkContext) -> {
-			Crawler footballNewsCrawler = new FootballNewsCrawler(webDriver, newsService);
+			Crawler footballNewsCrawler = new FootballNewsCrawler(webDriver, newsService, newsCountService);
 			footballNewsCrawler.crawl();
 			webDriver.close();
 			return RepeatStatus.FINISHED;
