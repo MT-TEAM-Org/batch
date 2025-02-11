@@ -42,19 +42,19 @@ public abstract class FootballBaseballCrawler {
 	private final WebDriver webDriver;
 	private final NewsService newsService;
 
-	protected void crawlForDate(String url, LocalDate date, boolean yesterday) {
+	protected void crawlForDate(String url, LocalDate date, boolean isYesterday) {
 		IntStream.rangeClosed(1, getPaginationCount(url, date)).forEach(pageCount -> {
 			webDriver.get(url + DATE_FIELD + EQUALS + date.format(FORMATTER) + PAGE_FIELD + EQUALS + pageCount);
-			saveNews(yesterday);
+			saveNews(isYesterday);
 		});
 	}
 
-	private void saveNews(boolean yesterday) {
+	private void saveNews(boolean isYesterday) {
 		for (WebElement news : getNewsList()) {
 			String postDate = getPostDate(news);
 			LocalDateTime newsPostDate = LocalDateTime.parse(postDate, TIME_FORMATTER);
 			// 오전 6시 크롤링이기 때문에 전날 뉴스는 오전 6시이후로만 가져오도록
-			if (yesterday && newsPostDate.toLocalTime().isBefore(LocalTime.of(6, 0))) {
+			if (isYesterday && newsPostDate.toLocalTime().isBefore(LocalTime.of(6, 0))) {
 				break;
 			}
 			saveNews(getTitle(news), getThumbImg(news), newsPostDate);

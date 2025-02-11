@@ -57,19 +57,19 @@ public class EsportsNewsCrawler implements Crawler {
 		crawlForDate(currentDate, false); // 오늘 뉴스 크롤링
 	}
 
-	private void crawlForDate(LocalDate date, boolean yesterday) {
+	private void crawlForDate(LocalDate date, boolean isYesterday) {
 		webDriver.get(URL + DATE_FIELD + EQUALS + date);
 
 		//ESports기사는 직접 URL에 날짜 입력해서 접근 시 당일날짜로 redirect되는 이슈가 있어 이전날짜는 직접 클릭해서 넘어가는걸로
-		clickDateBtn(yesterday, date);
+		clickDateBtn(isYesterday, date);
 
 		//뉴스 더보기 클릭으로 페이징이 되어있어 클릭이 안될 때까지 클릭하여 전체기사 가져오기
 		clickLoadNews();
-		saveNews(yesterday);
+		saveNews(isYesterday);
 	}
 
-	private void clickDateBtn(boolean yesterday, LocalDate date) {
-		if (yesterday) {
+	private void clickDateBtn(boolean isYesterday, LocalDate date) {
+		if (isYesterday) {
 			String dateLinkText = date.format(DateTimeFormatter.ofPattern(DATE_BTN_PATTERN));
 			webDriver.findElement(By.linkText(dateLinkText)).click();
 		}
@@ -87,7 +87,7 @@ public class EsportsNewsCrawler implements Crawler {
 		}
 	}
 
-	private void saveNews(boolean yesterday) {
+	private void saveNews(boolean isYesterday) {
 		for (WebElement news : getNewsList()) {
 			String postDate = getPostDate(news);
 			//뉴스계시날짜가 없으면 기사가 없는것
@@ -96,10 +96,9 @@ public class EsportsNewsCrawler implements Crawler {
 			}
 			LocalDateTime newsPostDate = parseRelativeTime(postDate);
 			// 오전 6시 크롤링이기 때문에 전날 뉴스는 오전 6시이후로만 가져오도록
-			if (yesterday && newsPostDate.toLocalTime().isBefore(LocalTime.of(6, 0))) {
+			if (isYesterday && newsPostDate.toLocalTime().isBefore(LocalTime.of(6, 0))) {
 				break;
 			}
-
 			saveNews(getTitle(news), getThumbImg(news, newsPostDate), newsPostDate);
 		}
 	}
