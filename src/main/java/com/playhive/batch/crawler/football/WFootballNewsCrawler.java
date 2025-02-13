@@ -21,11 +21,11 @@ import com.playhive.batch.news.service.NewsService;
 import lombok.RequiredArgsConstructor;
 
 @Component
-public class FootballNewsCrawler extends FootballBaseballCrawler implements Crawler {
+public class WFootballNewsCrawler extends FootballBaseballCrawler implements Crawler {
 
 	private static final String URL = "https://sports.news.naver.com/wfootball/news/index?isphoto=N";
 
-	public FootballNewsCrawler(WebDriver webDriver, NewsService newsService) {
+	public WFootballNewsCrawler(WebDriver webDriver, NewsService newsService) {
 		super(webDriver, newsService);
 	}
 
