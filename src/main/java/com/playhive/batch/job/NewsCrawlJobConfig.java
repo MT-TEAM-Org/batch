@@ -1,5 +1,7 @@
 package com.playhive.batch.job;
 
+import java.util.List;
+
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -31,8 +33,7 @@ public class NewsCrawlJobConfig {
 	private static final String NEWS_CRAWL_STEP_NAME = "newsCrawlStep";
 
 	private final WebDriver webDriver;
-	private final NewsService newsService;
-	private final NewsCountService newsCountService;
+	private final List<Crawler> crawlers;
 
 	@Bean
 	public Job newsCrawlJob(JobRepository jobRepository, Step newsCrawlStep) {
@@ -53,8 +54,9 @@ public class NewsCrawlJobConfig {
 	@Bean
 	public Tasklet newsTasklet() {
 		return (contribution, chunkContext) -> {
-			Crawler footballNewsCrawler = new FootballNewsCrawler(webDriver, newsService, newsCountService);
-			footballNewsCrawler.crawl();
+			for (Crawler crawler : crawlers) {
+				crawler.crawl();
+			}
 			webDriver.close();
 			return RepeatStatus.FINISHED;
 		};

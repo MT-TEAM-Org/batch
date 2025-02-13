@@ -15,9 +15,11 @@ import lombok.RequiredArgsConstructor;
 public class NewsService {
 
 	private final NewsRepository newsRepository;
+	private final NewsCountService newsCountService;
 
-	public News saveNews(NewsSaveRequest newsSaveRequest) {
-		return newsRepository.save(newsSaveRequest.toEntity());
+	public void saveNews(NewsSaveRequest newsSaveRequest) {
+		News news = newsRepository.save(newsSaveRequest.toEntity());
+		newsCountService.saveNewsCount(news);
 	}
 
 }

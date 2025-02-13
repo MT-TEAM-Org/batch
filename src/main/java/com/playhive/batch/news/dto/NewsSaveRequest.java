@@ -35,6 +35,24 @@ public class NewsSaveRequest {
 			.build();
 	}
 
+	public static NewsSaveRequest createBaseballRequest(String title, String thumbImg, LocalDateTime postDate) {
+		return NewsSaveRequest.builder()
+			.category(NewsCategory.BASEBALL)
+			.title(title)
+			.thumbImg(thumbImg)
+			.postDate(postDate)
+			.build();
+	}
+
+	public static NewsSaveRequest createEsportsRequest(String title, String thumbImg, LocalDateTime postDate) {
+		return NewsSaveRequest.builder()
+			.category(NewsCategory.ESPORTS)
+			.title(title)
+			.thumbImg(thumbImg)
+			.postDate(postDate)
+			.build();
+	}
+
 	public News toEntity() {
 		return News.builder()
 			.category(category)
