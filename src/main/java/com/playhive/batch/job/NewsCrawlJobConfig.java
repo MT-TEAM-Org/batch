@@ -3,8 +3,6 @@ package com.playhive.batch.job;
 import java.util.List;
 
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -17,11 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.playhive.batch.crawler.Crawler;
-import com.playhive.batch.crawler.football.FootballNewsCrawler;
 import com.playhive.batch.job.listener.JobLoggerListener;
-import com.playhive.batch.news.entity.NewsCount;
-import com.playhive.batch.news.service.NewsCountService;
-import com.playhive.batch.news.service.NewsService;
 
 import lombok.RequiredArgsConstructor;
 
