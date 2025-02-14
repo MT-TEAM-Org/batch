@@ -21,7 +21,7 @@ RUN ./gradlew dependencies --no-daemon
 COPY src src
 
 # 애플리케이션 빌드 (bootJar 실행)
-RUN ./gradle clean
+RUN ./gradlew clean
 RUN ./gradlew bootJar --no-daemon
 
 # Step 2: 런타임 이미지 생성
