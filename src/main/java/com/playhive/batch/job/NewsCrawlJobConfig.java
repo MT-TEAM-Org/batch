@@ -51,7 +51,6 @@ public class NewsCrawlJobConfig {
 			for (Crawler crawler : crawlers) {
 				crawler.crawl();
 			}
-			webDriver.close();
 			return RepeatStatus.FINISHED;
 		};
 	}
