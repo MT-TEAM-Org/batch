@@ -11,13 +11,15 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 
+import com.playhive.batch.global.config.WebDriverConfig;
 import com.playhive.batch.news.dto.NewsSaveRequest;
+import com.playhive.batch.news.entity.NewsCategory;
 import com.playhive.batch.news.service.NewsService;
 
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
 public abstract class FootballBaseballCrawler {
 
 	private static final String DATE_FIELD = "&date";
@@ -39,30 +41,36 @@ public abstract class FootballBaseballCrawler {
 	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 	private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
 
-	private final WebDriver webDriver;
 	private final NewsService newsService;
+	private WebDriver webDriver;
 
-	protected void crawlForDate(String url, LocalDate date, boolean isYesterday) {
-		IntStream.rangeClosed(1, getPaginationCount(url, date)).forEach(pageCount -> {
-			webDriver.get(url + DATE_FIELD + EQUALS + date.format(FORMATTER) + PAGE_FIELD + EQUALS + pageCount);
-			saveNews(isYesterday);
-		});
+	public FootballBaseballCrawler(NewsService newsService) {
+		this.newsService = newsService;
 	}
 
-	private void saveNews(boolean isYesterday) {
+	protected void crawlForDate(String url, LocalDate date, boolean isYesterday, NewsCategory category) {
+		webDriver = WebDriverConfig.createDriver();
+		IntStream.rangeClosed(1, getPaginationCount(url, date)).forEach(pageCount -> {
+			webDriver.get(url + DATE_FIELD + EQUALS + date.format(FORMATTER) + PAGE_FIELD + EQUALS + pageCount);
+			saveNews(isYesterday, category);
+		});
+		webDriver.quit();
+	}
+
+	private void saveNews(boolean isYesterday, NewsCategory category) {
 		for (WebElement news : getNewsList()) {
 			String postDate = getPostDate(news);
 			LocalDateTime newsPostDate = LocalDateTime.parse(postDate, TIME_FORMATTER);
 			// 오전 6시 크롤링이기 때문에 전날 뉴스는 오전 6시이후로만 가져오도록
 			if (isYesterday && newsPostDate.toLocalTime().isBefore(LocalTime.of(6, 0))) {
-				break;
+				continue;
 			}
-			saveNews(getTitle(news), getThumbImg(news), newsPostDate);
+			saveNews(getTitle(news), getThumbImg(news), newsPostDate, category);
 		}
 	}
 
-	private void saveNews(String title, String thumbImg, LocalDateTime postDate) {
-		this.newsService.saveNews(NewsSaveRequest.createFootballRequest(title, thumbImg, postDate));
+	private void saveNews(String title, String thumbImg, LocalDateTime postDate, NewsCategory category) {
+		this.newsService.saveNews(NewsSaveRequest.createRequest(title, thumbImg, postDate, category));
 	}
 
 	private List<WebElement> getNewsList() {

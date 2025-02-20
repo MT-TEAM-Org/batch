@@ -16,13 +16,14 @@ import org.openqa.selenium.WebElement;
 import org.springframework.stereotype.Component;
 
 import com.playhive.batch.crawler.Crawler;
+import com.playhive.batch.global.config.WebDriverConfig;
 import com.playhive.batch.news.dto.NewsSaveRequest;
 import com.playhive.batch.news.service.NewsService;
 
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
-@RequiredArgsConstructor
+@Slf4j
 public class EsportsNewsCrawler implements Crawler {
 
 	private static final String URL = "https://game.naver.com/esports/League_of_Legends/news/lol";
@@ -47,31 +48,46 @@ public class EsportsNewsCrawler implements Crawler {
 	private static final String MINUTE_KOREAN = "분";
 	private static final String HOUR_KOREAN = "시간";
 
-	private final WebDriver webDriver;
+	private WebDriver webDriver;
 	private final NewsService newsService;
+
+	public EsportsNewsCrawler(NewsService newsService) {
+		this.newsService = newsService;
+	}
 
 	@Override
 	public void crawl() {
+		webDriver = WebDriverConfig.createDriver();
 		LocalDate currentDate = LocalDate.now();
 		crawlForDate(currentDate.minusDays(1), true); // 어제 뉴스 크롤링
 		crawlForDate(currentDate, false); // 오늘 뉴스 크롤링
+		webDriver.quit();
 	}
 
 	private void crawlForDate(LocalDate date, boolean isYesterday) {
 		webDriver.get(URL + DATE_FIELD + EQUALS + date);
 
-		//ESports기사는 직접 URL에 날짜 입력해서 접근 시 당일날짜로 redirect되는 이슈가 있어 이전날짜는 직접 클릭해서 넘어가는걸로
-		clickDateBtn(isYesterday, date);
+		try {
+			//ESports기사는 직접 URL에 날짜 입력해서 접근 시 당일날짜로 redirect되는 이슈가 있어 이전날짜는 직접 클릭해서 넘어가는걸로
+			clickDateBtn(isYesterday, date);
 
-		//뉴스 더보기 클릭으로 페이징이 되어있어 클릭이 안될 때까지 클릭하여 전체기사 가져오기
-		clickLoadNews();
-		saveNews(isYesterday);
+			//뉴스 더보기 클릭으로 페이징이 되어있어 클릭이 안될 때까지 클릭하여 전체기사 가져오기
+			clickLoadNews();
+			saveNews(isYesterday);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+
 	}
 
 	private void clickDateBtn(boolean isYesterday, LocalDate date) {
 		if (isYesterday) {
 			String dateLinkText = date.format(DateTimeFormatter.ofPattern(DATE_BTN_PATTERN));
-			webDriver.findElement(By.linkText(dateLinkText)).click();
+			try {
+				webDriver.findElement(By.linkText(dateLinkText)).click();
+			} catch (NoSuchElementException e) {
+				log.error("{} Element not found", dateLinkText, e);
+			}
 		}
 	}
 
@@ -97,8 +113,9 @@ public class EsportsNewsCrawler implements Crawler {
 			LocalDateTime newsPostDate = parseRelativeTime(postDate);
 			// 오전 6시 크롤링이기 때문에 전날 뉴스는 오전 6시이후로만 가져오도록
 			if (isYesterday && newsPostDate.toLocalTime().isBefore(LocalTime.of(6, 0))) {
-				break;
+				continue;
 			}
+			// System.out.println(getTitle(news));
 			saveNews(getTitle(news), getThumbImg(news, newsPostDate), newsPostDate);
 		}
 	}

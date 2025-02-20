@@ -26,21 +26,13 @@ public class NewsSaveRequest {
 		this.postDate = postDate;
 	}
 
-	public static NewsSaveRequest createFootballRequest(String title, String thumbImg, LocalDateTime postDate) {
+	public static NewsSaveRequest createRequest(String title, String thumbImg, LocalDateTime postDate, NewsCategory category) {
 		return NewsSaveRequest.builder()
 			.category(NewsCategory.FOOTBALL)
 			.title(title)
 			.thumbImg(thumbImg)
 			.postDate(postDate)
-			.build();
-	}
-
-	public static NewsSaveRequest createBaseballRequest(String title, String thumbImg, LocalDateTime postDate) {
-		return NewsSaveRequest.builder()
-			.category(NewsCategory.BASEBALL)
-			.title(title)
-			.thumbImg(thumbImg)
-			.postDate(postDate)
+			.category(category)
 			.build();
 	}
 

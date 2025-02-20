@@ -2,7 +2,6 @@ package com.playhive.batch.job;
 
 import java.util.List;
 
-import org.openqa.selenium.WebDriver;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -26,7 +25,6 @@ public class NewsCrawlJobConfig {
 	private static final String NEWS_CRAWL_JOB_NAME = "newsCrawlJob";
 	private static final String NEWS_CRAWL_STEP_NAME = "newsCrawlStep";
 
-	private final WebDriver webDriver;
 	private final List<Crawler> crawlers;
 
 	@Bean
