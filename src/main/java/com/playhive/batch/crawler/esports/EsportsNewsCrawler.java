@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import com.playhive.batch.crawler.Crawler;
 import com.playhive.batch.global.config.WebDriverConfig;
 import com.playhive.batch.news.dto.NewsSaveRequest;
+import com.playhive.batch.news.entity.NewsCategory;
 import com.playhive.batch.news.service.NewsService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -115,13 +116,13 @@ public class EsportsNewsCrawler implements Crawler {
 			if (isYesterday && newsPostDate.toLocalTime().isBefore(LocalTime.of(6, 0))) {
 				continue;
 			}
-			// System.out.println(getTitle(news));
-			saveNews(getTitle(news), getThumbImg(news, newsPostDate), newsPostDate);
+			System.out.println(getTitle(news)+" "+getSource(news));
+			// saveNews(getTitle(news), getThumbImg(news, newsPostDate), getSource(news), newsPostDate);
 		}
 	}
 
-	private void saveNews(String title, String thumbImg, LocalDateTime postDate) {
-		this.newsService.saveNews(NewsSaveRequest.createEsportsRequest(title, thumbImg, postDate));
+	private void saveNews(String title, String thumbImg, String source, LocalDateTime postDate) {
+		this.newsService.saveNews(NewsSaveRequest.createRequest(title, thumbImg, source, postDate, NewsCategory.ESPORTS));
 	}
 
 	private List<WebElement> getNewsList() {
@@ -152,6 +153,11 @@ public class EsportsNewsCrawler implements Crawler {
 		ThumbImg thumbImg = new ThumbImg();
 		thumbImg.createThumbImgUrl(news, newsPostDate);
 		return thumbImg.getUrl();
+	}
+
+	private String getSource(WebElement news) {
+		List<WebElement> timeElements = news.findElements(By.className(TIME_CLASS));
+		return timeElements.get(0).getText();
 	}
 
 	//ESports는 해외축구, 국내야구와 다르게 24시간까지는 날짜가 아니라 *분전, *시간전으로 표기되어 자세한 뉴스 날짜를 알수가 없어 현재 시간 기준으로 계산

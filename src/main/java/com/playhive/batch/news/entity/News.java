@@ -30,14 +30,17 @@ public class News extends BaseTime {
 
 	private String thumbImg;
 
+	private String source;
+
 	private LocalDateTime postDate;
 
 	@Builder
-	public News(Long id, NewsCategory category, String title, String thumbImg, LocalDateTime postDate) {
+	public News(Long id, NewsCategory category, String title, String thumbImg, String source, LocalDateTime postDate) {
 		this.id = id;
 		this.category = category;
 		this.title = title;
 		this.thumbImg = thumbImg;
+		this.source = source;
 		this.postDate = postDate;
 	}
 }
