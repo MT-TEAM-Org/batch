@@ -11,14 +11,11 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 
 import com.playhive.batch.global.config.WebDriverConfig;
 import com.playhive.batch.news.dto.NewsSaveRequest;
 import com.playhive.batch.news.entity.NewsCategory;
 import com.playhive.batch.news.service.NewsService;
-
-import lombok.RequiredArgsConstructor;
 
 public abstract class FootballBaseballCrawler {
 
@@ -31,12 +28,15 @@ public abstract class FootballBaseballCrawler {
 	private static final String TITLE_CLASS = "text";
 	private static final String THUMB_CLASS = "thmb";
 	private static final String PAGE_CLASS = "paginate";
+	private static final String SOURCE_CLASS = "press";
+	private static final String CONTENT_CLASS = "desc";
 
 	private static final String LI_TAG = "li";
 	private static final String SPAN_TAG = "span";
 	private static final String IMG_TAG = "img";
 	private static final String SRC_ATTR = "src";
 	private static final String A_TAG = "a";
+	private static final String HREF_ATTR = "href";
 
 	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 	private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
@@ -65,12 +65,13 @@ public abstract class FootballBaseballCrawler {
 			if (isYesterday && newsPostDate.toLocalTime().isBefore(LocalTime.of(6, 0))) {
 				continue;
 			}
-			saveNews(getTitle(news), getThumbImg(news), newsPostDate, category);
+			saveNews(getTitle(news), getThumbImg(news), getSource(news), getContent(news), newsPostDate, category);
 		}
 	}
 
-	private void saveNews(String title, String thumbImg, LocalDateTime postDate, NewsCategory category) {
-		this.newsService.saveNews(NewsSaveRequest.createRequest(title, thumbImg, postDate, category));
+	private void saveNews(String title, String thumbImg, String source, String content, LocalDateTime postDate,
+		NewsCategory category) {
+		this.newsService.saveNews(NewsSaveRequest.createRequest(title, thumbImg, source, content, postDate, category));
 	}
 
 	private List<WebElement> getNewsList() {
@@ -95,6 +96,14 @@ public abstract class FootballBaseballCrawler {
 		} catch (NoSuchElementException e) {
 			return null;
 		}
+	}
+
+	private String getSource(WebElement news) {
+		return news.findElement(By.tagName(A_TAG)).getAttribute(HREF_ATTR);
+	}
+
+	private String getContent(WebElement news) {
+		return news.findElement(By.className(CONTENT_CLASS)).getText();
 	}
 
 	//페이징 개수 가져오기

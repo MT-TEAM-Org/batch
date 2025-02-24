@@ -10,6 +10,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,14 +31,22 @@ public class News extends BaseTime {
 
 	private String thumbImg;
 
+	private String source;
+
+	@Lob
+	private String content;
+
 	private LocalDateTime postDate;
 
 	@Builder
-	public News(Long id, NewsCategory category, String title, String thumbImg, LocalDateTime postDate) {
+	public News(Long id, NewsCategory category, String title, String thumbImg, String source, String content,
+		LocalDateTime postDate) {
 		this.id = id;
 		this.category = category;
 		this.title = title;
 		this.thumbImg = thumbImg;
+		this.source = source;
+		this.content = content;
 		this.postDate = postDate;
 	}
 }

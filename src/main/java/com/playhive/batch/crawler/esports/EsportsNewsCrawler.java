@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import com.playhive.batch.crawler.Crawler;
 import com.playhive.batch.global.config.WebDriverConfig;
 import com.playhive.batch.news.dto.NewsSaveRequest;
+import com.playhive.batch.news.entity.NewsCategory;
 import com.playhive.batch.news.service.NewsService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -36,9 +37,12 @@ public class EsportsNewsCrawler implements Crawler {
 	private static final String TIME_CLASS = "news_card_source__1jv12";
 	private static final String TITLE_CLASS = "news_card_title__1fVVk";
 	private static final String LOAD_NEWS_CLASS = "news_list_more_btn__3QwSl";
+	private static final String CONTENT_CLASS = "news_card_subcontent__23_y1";
 
 	private static final String LI_TAG = "li.news_card_item__2lh4o";
 	private static final String SVG_TAG = "svg";
+	private static final String A_TAG = "a";
+	private static final String HREF_ATTR = "href";
 
 	private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
 
@@ -115,13 +119,13 @@ public class EsportsNewsCrawler implements Crawler {
 			if (isYesterday && newsPostDate.toLocalTime().isBefore(LocalTime.of(6, 0))) {
 				continue;
 			}
-			// System.out.println(getTitle(news));
-			saveNews(getTitle(news), getThumbImg(news, newsPostDate), newsPostDate);
+			saveNews(getTitle(news), getThumbImg(news, newsPostDate), getSource(news), getContent(news), newsPostDate);
 		}
 	}
 
-	private void saveNews(String title, String thumbImg, LocalDateTime postDate) {
-		this.newsService.saveNews(NewsSaveRequest.createEsportsRequest(title, thumbImg, postDate));
+	private void saveNews(String title, String thumbImg, String source, String content, LocalDateTime postDate) {
+		this.newsService.saveNews(
+			NewsSaveRequest.createRequest(title, thumbImg, source, content, postDate, NewsCategory.ESPORTS));
 	}
 
 	private List<WebElement> getNewsList() {
@@ -152,6 +156,14 @@ public class EsportsNewsCrawler implements Crawler {
 		ThumbImg thumbImg = new ThumbImg();
 		thumbImg.createThumbImgUrl(news, newsPostDate);
 		return thumbImg.getUrl();
+	}
+
+	private String getSource(WebElement news) {
+		return news.findElement(By.tagName(A_TAG)).getAttribute(HREF_ATTR);
+	}
+
+	private String getContent(WebElement news) {
+		return news.findElement(By.className(CONTENT_CLASS)).getText();
 	}
 
 	//ESports는 해외축구, 국내야구와 다르게 24시간까지는 날짜가 아니라 *분전, *시간전으로 표기되어 자세한 뉴스 날짜를 알수가 없어 현재 시간 기준으로 계산
