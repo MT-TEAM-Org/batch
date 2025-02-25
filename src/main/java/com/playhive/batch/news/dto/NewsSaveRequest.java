@@ -37,7 +37,7 @@ public class NewsSaveRequest {
 		return NewsSaveRequest.builder()
 			.category(NewsCategory.FOOTBALL)
 			.title(title)
-			.thumbImg(thumbImg)s
+			.thumbImg(thumbImg)
 			.source(source)
 			.content(content)
 			.postDate(postDate)
