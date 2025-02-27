@@ -1,4 +1,4 @@
-package com.playhive.batch.crawler.esports;
+package com.playhive.batch.crawler.news.esports;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,7 +15,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.springframework.stereotype.Component;
 
-import com.playhive.batch.crawler.Crawler;
+import com.playhive.batch.crawler.news.NewsCrawler;
 import com.playhive.batch.global.config.WebDriverConfig;
 import com.playhive.batch.news.dto.NewsSaveRequest;
 import com.playhive.batch.news.entity.NewsCategory;
@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
-public class EsportsNewsCrawler implements Crawler {
+public class EsportsNewsCrawler implements NewsCrawler {
 
 	private static final String URL = "https://game.naver.com/esports/League_of_Legends/news/lol";
 

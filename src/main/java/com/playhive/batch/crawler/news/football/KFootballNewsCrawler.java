@@ -1,16 +1,16 @@
-package com.playhive.batch.crawler.football;
+package com.playhive.batch.crawler.news.football;
 
 import java.time.LocalDate;
 
 import org.springframework.stereotype.Component;
 
-import com.playhive.batch.crawler.Crawler;
-import com.playhive.batch.crawler.FootballBaseballCrawler;
+import com.playhive.batch.crawler.news.NewsCrawler;
+import com.playhive.batch.crawler.news.FootballBaseballCrawler;
 import com.playhive.batch.news.entity.NewsCategory;
 import com.playhive.batch.news.service.NewsService;
 
 @Component
-public class KFootballNewsCrawler extends FootballBaseballCrawler implements Crawler {
+public class KFootballNewsCrawler extends FootballBaseballCrawler implements NewsCrawler {
 
 	private static final String URL = "https://sports.news.naver.com/kfootball/news/index?isphoto=N";
 

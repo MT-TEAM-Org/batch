@@ -20,31 +20,31 @@ import lombok.RequiredArgsConstructor;
 
 @Configuration
 @RequiredArgsConstructor
-public class NewsCrawlJobConfig {
+public class TeamCrawlJobConfig {
 
-	private static final String NEWS_CRAWL_JOB_NAME = "newsCrawlJob";
-	private static final String NEWS_CRAWL_STEP_NAME = "newsCrawlStep";
+	private static final String TEAM_CRAWL_JOB_NAME = "teamCrawlJob";
+	private static final String TEAM_CRAWL_STEP_NAME = "teamCrawlStep";
 
 	private final List<NewsCrawler> crawlers;
 
 	@Bean
-	public Job newsCrawlJob(JobRepository jobRepository, Step newsCrawlStep) {
-		return new JobBuilder(NEWS_CRAWL_JOB_NAME, jobRepository)
+	public Job teamCrawlJob(JobRepository jobRepository, Step newsCrawlStep) {
+		return new JobBuilder(TEAM_CRAWL_JOB_NAME, jobRepository)
 			.listener(new JobLoggerListener())
 			.start(newsCrawlStep)
 			.build();
 	}
 
 	@Bean
-	public Step newsCrawlStep(JobRepository jobRepository, Tasklet newsTasklet,
+	public Step teamCrawlStep(JobRepository jobRepository, Tasklet newsTasklet,
 		PlatformTransactionManager transactionManager) {
-		return new StepBuilder(NEWS_CRAWL_STEP_NAME, jobRepository)
+		return new StepBuilder(TEAM_CRAWL_STEP_NAME, jobRepository)
 			.tasklet(newsTasklet, transactionManager)
 			.build();
 	}
 
 	@Bean
-	public Tasklet newsTasklet() {
+	public Tasklet teamTasklet() {
 		return (contribution, chunkContext) -> {
 			for (NewsCrawler crawler : crawlers) {
 				crawler.crawl();
