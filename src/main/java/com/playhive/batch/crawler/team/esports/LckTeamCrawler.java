@@ -42,7 +42,7 @@ public class LckTeamCrawler implements TeamCrawler {
 		crawlTeam();
 	}
 
-	protected void crawlTeam() {
+	private void crawlTeam() {
 		webDriver = WebDriverConfig.createDriver();
 		webDriver.get(URL);
 		WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(10));
