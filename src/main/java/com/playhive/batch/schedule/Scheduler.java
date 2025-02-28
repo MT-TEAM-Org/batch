@@ -21,6 +21,7 @@ public class Scheduler {
 
 	private final Job newsCrawlJob;
 	private final Job teamCrawlJob;
+	private final Job matchCrawlJob;
 	private final JobLauncher jobLauncher;
 
 	@Scheduled(cron = "0 0 6 * * *") // 매일 오전 6시 0분 0초에 실행
@@ -51,5 +52,20 @@ public class Scheduler {
 			.toJobParameters();
 
 		this.jobLauncher.run(teamCrawlJob, jobParameters);
+	}
+
+	@Scheduled(cron = "0 0 7 * * *") // 매일 오전 7시 0분 0초에 실행
+	public void matchCrawlJob() throws
+		JobInstanceAlreadyCompleteException,
+		JobExecutionAlreadyRunningException,
+		JobParametersInvalidException,
+		JobRestartException {
+
+		JobParameters jobParameters = new JobParametersBuilder()
+			.addDate("date", new Date())
+			.addLong("time", System.currentTimeMillis())
+			.toJobParameters();
+
+		this.jobLauncher.run(matchCrawlJob, jobParameters);
 	}
 }

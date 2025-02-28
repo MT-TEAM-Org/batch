@@ -13,42 +13,41 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import com.playhive.batch.crawler.match.MatchCrawler;
 import com.playhive.batch.crawler.news.NewsCrawler;
-import com.playhive.batch.crawler.team.TeamCrawler;
 import com.playhive.batch.job.listener.JobLoggerListener;
-import com.playhive.batch.match.team.domain.Team;
 
 import lombok.RequiredArgsConstructor;
 
 @Configuration
 @RequiredArgsConstructor
-public class TeamCrawlJobConfig {
+public class MatchCrawlJobConfig {
 
-	private static final String TEAM_CRAWL_JOB_NAME = "teamCrawlJob";
-	private static final String TEAM_CRAWL_STEP_NAME = "teamCrawlStep";
+	private static final String MATCH_CRAWL_JOB_NAME = "matchCrawlJob";
+	private static final String MATCH_CRAWL_STEP_NAME = "matchCrawlStep";
 
-	private final List<TeamCrawler> crawlers;
+	private final List<MatchCrawler> crawlers;
 
 	@Bean
-	public Job teamCrawlJob(JobRepository jobRepository, Step teamCrawlStep) {
-		return new JobBuilder(TEAM_CRAWL_JOB_NAME, jobRepository)
+	public Job matchCrawlJob(JobRepository jobRepository, Step matchCrawlStep) {
+		return new JobBuilder(MATCH_CRAWL_JOB_NAME, jobRepository)
 			.listener(new JobLoggerListener())
-			.start(teamCrawlStep)
+			.start(matchCrawlStep)
 			.build();
 	}
 
 	@Bean
-	public Step teamCrawlStep(JobRepository jobRepository, Tasklet teamTasklet,
+	public Step matchCrawlStep(JobRepository jobRepository, Tasklet matchTasklet,
 		PlatformTransactionManager transactionManager) {
-		return new StepBuilder(TEAM_CRAWL_STEP_NAME, jobRepository)
-			.tasklet(teamTasklet, transactionManager)
+		return new StepBuilder(MATCH_CRAWL_STEP_NAME, jobRepository)
+			.tasklet(matchTasklet, transactionManager)
 			.build();
 	}
 
 	@Bean
-	public Tasklet teamTasklet() {
+	public Tasklet matchTasklet() {
 		return (contribution, chunkContext) -> {
-			for (TeamCrawler crawler : crawlers) {
+			for (MatchCrawler crawler : crawlers) {
 				crawler.crawl();
 			}
 			return RepeatStatus.FINISHED;
