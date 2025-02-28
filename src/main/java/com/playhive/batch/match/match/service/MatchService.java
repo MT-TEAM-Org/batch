@@ -3,8 +3,10 @@ package com.playhive.batch.match.match.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.playhive.batch.match.match.domain.Match;
 import com.playhive.batch.match.match.dto.service.request.MatchServiceRequest;
 import com.playhive.batch.match.match.repository.MatchRepository;
+import com.playhive.batch.match.matchPrediction.service.MatchPredictionService;
 import com.playhive.batch.match.team.domain.Team;
 import com.playhive.batch.match.team.domain.TeamCategory;
 import com.playhive.batch.match.team.repository.TeamRepository;
@@ -20,6 +22,7 @@ public class MatchService {
 	private final MatchRepository matchRepository;
 	private final TeamReadService teamReadService;
 	private final TeamRepository teamRepository;
+	private final MatchPredictionService matchPredictionService;
 
 	public void save(MatchServiceRequest matchServiceRequest) {
 		TeamCategory teamCategory = TeamCategory.fromText(matchServiceRequest.getCategory().getText());
@@ -27,7 +30,8 @@ public class MatchService {
 		Team homeTeam = saveTeam(matchServiceRequest.getHomeTeamName(), matchServiceRequest.getHomeTeamLogo(), teamCategory);
 		Team awayTeam = saveTeam(matchServiceRequest.getAwayTeamName(), matchServiceRequest.getHomeTeamLogo(), teamCategory);
 
-		matchRepository.save(matchServiceRequest.toEntity(homeTeam, awayTeam));
+		Match match = matchRepository.save(matchServiceRequest.toEntity(homeTeam, awayTeam));
+		matchPredictionService.save(match);
 	}
 
 	private Team saveTeam(String name, String logo, TeamCategory teamCategory) {
