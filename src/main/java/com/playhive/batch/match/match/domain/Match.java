@@ -32,17 +32,30 @@ public class Match extends BaseTime {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Team awayTeam;
 
+	private String place;
+
 	@Enumerated(EnumType.STRING)
 	private MatchCategory category;
 
 	private LocalDateTime startTime;
 
 	@Builder
-	public Match(Long id, Team homeTeam, Team awayTeam, MatchCategory category, LocalDateTime startTime) {
+	public Match(Long id, Team homeTeam, Team awayTeam, String place, MatchCategory category, LocalDateTime startTime) {
 		this.id = id;
 		this.homeTeam = homeTeam;
 		this.awayTeam = awayTeam;
+		this.place = place;
 		this.category = category;
 		this.startTime = startTime;
+	}
+
+	public static Match createEntity(Team homeTeam, Team awayTeam, String place, MatchCategory category, LocalDateTime startTime) {
+		return Match.builder()
+			.homeTeam(homeTeam)
+			.awayTeam(awayTeam)
+			.place(place)
+			.category(category)
+			.startTime(startTime)
+			.build();
 	}
 }

@@ -17,7 +17,7 @@ public class TeamReadService {
 
 	private final TeamRepository teamRepository;
 
-	public Team findByName(String name, TeamCategory category) {
+	public Team findByNameAndCategory(String name, TeamCategory category) {
 		return teamRepository.findByNameAndCategory(name, category)
 			.orElseThrow(() -> new IllegalArgumentException("존재하는 팀이 없습니다."));
 	}

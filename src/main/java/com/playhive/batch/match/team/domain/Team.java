@@ -35,4 +35,18 @@ public class Team extends BaseTime {
 		this.logo = logo;
 		this.category = category;
 	}
+
+	public void updateLogo(String logo) {
+		if (this.logo == null) {
+			this.logo = logo;
+		}
+	}
+
+	public static Team createEntity(String name, String logo, TeamCategory category) {
+		return Team.builder()
+			.name(name)
+			.logo(logo)
+			.category(category)
+			.build();
+	}
 }
