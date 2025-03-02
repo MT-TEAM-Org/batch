@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import com.playhive.batch.crawler.match.MatchCrawler;
 import com.playhive.batch.crawler.news.NewsCrawler;
 import com.playhive.batch.job.listener.JobLoggerListener;
 
@@ -20,33 +21,33 @@ import lombok.RequiredArgsConstructor;
 
 @Configuration
 @RequiredArgsConstructor
-public class NewsCrawlJobConfig {
+public class MatchCrawlJobConfig {
 
-	private static final String NEWS_CRAWL_JOB_NAME = "newsCrawlJob";
-	private static final String NEWS_CRAWL_STEP_NAME = "newsCrawlStep";
+	private static final String MATCH_CRAWL_JOB_NAME = "matchCrawlJob";
+	private static final String MATCH_CRAWL_STEP_NAME = "matchCrawlStep";
 
-	private final List<NewsCrawler> crawlers;
+	private final List<MatchCrawler> crawlers;
 
 	@Bean
-	public Job newsCrawlJob(JobRepository jobRepository, Step newsCrawlStep) {
-		return new JobBuilder(NEWS_CRAWL_JOB_NAME, jobRepository)
+	public Job matchCrawlJob(JobRepository jobRepository, Step matchCrawlStep) {
+		return new JobBuilder(MATCH_CRAWL_JOB_NAME, jobRepository)
 			.listener(new JobLoggerListener())
-			.start(newsCrawlStep)
+			.start(matchCrawlStep)
 			.build();
 	}
 
 	@Bean
-	public Step newsCrawlStep(JobRepository jobRepository, Tasklet newsTasklet,
+	public Step matchCrawlStep(JobRepository jobRepository, Tasklet matchTasklet,
 		PlatformTransactionManager transactionManager) {
-		return new StepBuilder(NEWS_CRAWL_STEP_NAME, jobRepository)
-			.tasklet(newsTasklet, transactionManager)
+		return new StepBuilder(MATCH_CRAWL_STEP_NAME, jobRepository)
+			.tasklet(matchTasklet, transactionManager)
 			.build();
 	}
 
 	@Bean
-	public Tasklet newsTasklet() {
+	public Tasklet matchTasklet() {
 		return (contribution, chunkContext) -> {
-			for (NewsCrawler crawler : crawlers) {
+			for (MatchCrawler crawler : crawlers) {
 				crawler.crawl();
 			}
 			return RepeatStatus.FINISHED;

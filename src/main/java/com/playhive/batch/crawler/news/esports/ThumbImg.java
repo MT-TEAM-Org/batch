@@ -1,4 +1,4 @@
-package com.playhive.batch.crawler.esports;
+package com.playhive.batch.crawler.news.esports;
 
 import java.time.LocalDateTime;
 import java.util.regex.Matcher;

@@ -14,39 +14,41 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.playhive.batch.crawler.news.NewsCrawler;
+import com.playhive.batch.crawler.team.TeamCrawler;
 import com.playhive.batch.job.listener.JobLoggerListener;
+import com.playhive.batch.match.team.domain.Team;
 
 import lombok.RequiredArgsConstructor;
 
 @Configuration
 @RequiredArgsConstructor
-public class NewsCrawlJobConfig {
+public class TeamCrawlJobConfig {
 
-	private static final String NEWS_CRAWL_JOB_NAME = "newsCrawlJob";
-	private static final String NEWS_CRAWL_STEP_NAME = "newsCrawlStep";
+	private static final String TEAM_CRAWL_JOB_NAME = "teamCrawlJob";
+	private static final String TEAM_CRAWL_STEP_NAME = "teamCrawlStep";
 
-	private final List<NewsCrawler> crawlers;
+	private final List<TeamCrawler> crawlers;
 
 	@Bean
-	public Job newsCrawlJob(JobRepository jobRepository, Step newsCrawlStep) {
-		return new JobBuilder(NEWS_CRAWL_JOB_NAME, jobRepository)
+	public Job teamCrawlJob(JobRepository jobRepository, Step teamCrawlStep) {
+		return new JobBuilder(TEAM_CRAWL_JOB_NAME, jobRepository)
 			.listener(new JobLoggerListener())
-			.start(newsCrawlStep)
+			.start(teamCrawlStep)
 			.build();
 	}
 
 	@Bean
-	public Step newsCrawlStep(JobRepository jobRepository, Tasklet newsTasklet,
+	public Step teamCrawlStep(JobRepository jobRepository, Tasklet teamTasklet,
 		PlatformTransactionManager transactionManager) {
-		return new StepBuilder(NEWS_CRAWL_STEP_NAME, jobRepository)
-			.tasklet(newsTasklet, transactionManager)
+		return new StepBuilder(TEAM_CRAWL_STEP_NAME, jobRepository)
+			.tasklet(teamTasklet, transactionManager)
 			.build();
 	}
 
 	@Bean
-	public Tasklet newsTasklet() {
+	public Tasklet teamTasklet() {
 		return (contribution, chunkContext) -> {
-			for (NewsCrawler crawler : crawlers) {
+			for (TeamCrawler crawler : crawlers) {
 				crawler.crawl();
 			}
 			return RepeatStatus.FINISHED;

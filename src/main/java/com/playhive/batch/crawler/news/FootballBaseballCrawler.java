@@ -1,4 +1,4 @@
-package com.playhive.batch.crawler;
+package com.playhive.batch.crawler.news;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

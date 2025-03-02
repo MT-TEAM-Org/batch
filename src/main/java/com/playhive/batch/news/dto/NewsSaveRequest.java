@@ -51,6 +51,7 @@ public class NewsSaveRequest {
 			.title(title)
 			.thumbImg(thumbImg)
 			.source(source)
+			.content(content)
 			.postDate(postDate)
 			.build();
 	}
