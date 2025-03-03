@@ -59,23 +59,7 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
 
-    steps:     
-      - name: Install Java on AWS
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.AWS_SERVER_IP }}
-          username: ${{ secrets.AWS_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            echo "Checking if Java is installed..."
-            if ! java -version &> /dev/null; then
-              echo "Java not found. Installing OpenJDK 17..."
-              sudo apt update
-              sudo apt install -y openjdk-17-jdk
-            else
-              echo "Java is already installed."
-            fi
-
+    steps:    
       - name: Deploy to AWS and Restart Services with Docker Compose
         uses: appleboy/ssh-action@v0.1.10
         with:
