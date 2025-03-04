@@ -45,9 +45,12 @@ public class GameEventCrawler implements GameCrawler {
 
     @Override
     public void crawl() {
-        webDriver = WebDriverConfig.createDriver();
-        crawlGameEvent();
-        webDriver.quit();
+        try {
+            webDriver = WebDriverConfig.createDriver();
+            crawlGameEvent();
+        } finally {
+            webDriver.quit();
+        }
     }
 
     private void crawlGameEvent() {

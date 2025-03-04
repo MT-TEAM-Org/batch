@@ -54,8 +54,8 @@ public class GameDiscountCrawler implements GameCrawler {
 
     @Override
     public void crawl() {
-        webDriver = WebDriverConfig.createDriver();
         try {
+            webDriver = WebDriverConfig.createDriver();
             crawlGameDiscount();
         } finally {
             webDriver.quit();
