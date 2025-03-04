@@ -96,8 +96,9 @@ public class GameDiscountCrawler implements GameCrawler {
 
         // 특가 콘텐츠가 로드될 때까지 대기
         log.info("특가 콘텐츠 로딩 대기 중...");
-        WebElement specialContent = wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.id(SPECIALS_CONTENT)));
+        WebElement specialContent = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(By.id(SPECIALS_CONTENT))
+        );
 
         try {
             // 페이지 완전히 로드될 때까지 잠시 대기
