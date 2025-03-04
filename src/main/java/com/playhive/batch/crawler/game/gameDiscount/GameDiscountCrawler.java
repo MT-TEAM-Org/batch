@@ -132,7 +132,8 @@ public class GameDiscountCrawler implements GameCrawler {
     }
 
     private String getFinalPrice(WebElement discountBlock) {
-        return discountBlock.findElement(By.className(FINAL_PRICE)).getText();
+        String finalPrice = discountBlock.findElement(By.className(FINAL_PRICE)).getText();
+        return finalPrice.replaceAll("[^0-9]", "");
     }
 
     private String getDiscountPercent(WebElement discountBlock) {
@@ -140,7 +141,8 @@ public class GameDiscountCrawler implements GameCrawler {
     }
 
     private String getOriginalPrice(WebElement discountBlock) {
-        return discountBlock.findElement(By.className(ORIGINAL_PRICE)).getText();
+        String originalPrice = discountBlock.findElement(By.className(ORIGINAL_PRICE)).getText();
+        return originalPrice.replaceAll("[^0-9]", "");
     }
 
     private String getLink(WebElement gameElement) {
