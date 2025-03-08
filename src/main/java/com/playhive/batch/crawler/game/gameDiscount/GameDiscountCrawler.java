@@ -79,8 +79,11 @@ public class GameDiscountCrawler implements GameCrawler {
             // 노출 기간
             LocalDateTime exposureDate = LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.MIDNIGHT);
 
-            // 가격 정보 요소
-            WebElement discountBlock = gameElement.findElement(By.className(DISCOUNT_BLOCK));
+            // 가격 정보 요소 (없으면 null)
+            WebElement discountBlock = gameElement.findElements(By.className(DISCOUNT_BLOCK))
+                    .stream()
+                    .findFirst()
+                    .orElse(null);
 
             gameDiscountService.saveGameDiscount(GameDiscountSaveRequest.createRequest(
                     getThumbImg(gameElement), getTitle(gameElement), getOriginalPrice(discountBlock),
@@ -133,15 +136,24 @@ public class GameDiscountCrawler implements GameCrawler {
     }
 
     private String getFinalPrice(WebElement discountBlock) {
+        if (discountBlock == null) {
+            return null;
+        }
         String finalPrice = discountBlock.findElement(By.className(FINAL_PRICE)).getText();
         return finalPrice.replaceAll("[^0-9]", "");
     }
 
     private String getDiscountPercent(WebElement discountBlock) {
+        if (discountBlock == null) {
+            return null;
+        }
         return discountBlock.findElement(By.className(DISCOUNT_PCT)).getText();
     }
 
     private String getOriginalPrice(WebElement discountBlock) {
+        if (discountBlock == null) {
+            return null;
+        }
         String originalPrice = discountBlock.findElement(By.className(ORIGINAL_PRICE)).getText();
         return originalPrice.replaceAll("[^0-9]", "");
     }
