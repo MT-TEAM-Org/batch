@@ -68,7 +68,8 @@ public class Scheduler {
         this.jobLauncher.run(matchCrawlJob, jobParameters);
     }
 
-    @Scheduled(cron = "0 0 23 * * *") // 매일 오후 11에 다음날에 노출될 게임 정보 크롤링 실행
+    //    @Scheduled(cron = "0 0 23 * * *") // 매일 오후 11에 다음날에 노출될 게임 정보 크롤링 실행
+    @Scheduled(cron = "0 10 0 * * *") // 매일 00시 10분(밤 12시 10분)에 실행 (에러 테스트)
     public void gameEventCrawl() throws JobInstanceAlreadyCompleteException,
             JobExecutionAlreadyRunningException,
             JobParametersInvalidException, JobRestartException {
