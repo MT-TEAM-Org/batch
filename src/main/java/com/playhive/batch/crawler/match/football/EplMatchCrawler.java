@@ -37,13 +37,14 @@ public class EplMatchCrawler implements MatchCrawler {
 	private static final String MATCH_CLASS = "MatchBox_match_item__3_D0Q";
 	private static final String MATCH_TIME_CLASS = "MatchBox_time__nIEfd";
 	private static final String MATCH_PLACE = "MatchBox_stadium__13gft";
-	private static final String TEAM_NAME_CLASS = "MatchBoxTeamArea_team__3aB4O";
-	private static final String TEAM_LOGO_CLASS = "MatchBoxTeamArea_emblem__1kpNQ";
+	private static final String TEAM_NAME_CLASS = "MatchBoxHeadToHeadArea_team__40JQL";
+	private static final String TEAM_LOGO_CLASS = "MatchBoxHeadToHeadArea_emblem__15NcN";
 
 	private static final String IMG_TAG = "img";
 	private static final String SRC_ATTR = "src";
 
 	private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 	private static final String EPL_NAME = "프리미어리그";
 	private static final String BLANK = " ";
@@ -74,15 +75,14 @@ public class EplMatchCrawler implements MatchCrawler {
 
 	public List<String> getCrawlDate() {
 		LocalDateTime recentDate = matchReadService.getLatestMatchStartTime();
-		LocalDateTime targetDate = LocalDateTime.of(2025, 3, 8, 0, 0, 0).plusWeeks(1);
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		LocalDateTime targetDate = LocalDateTime.now().plusWeeks(1);
 
 		List<String> dateList = new ArrayList<>();
 
 		LocalDateTime startDate = (recentDate != null) ? recentDate.plusDays(1) : LocalDateTime.now();
 
 		while (startDate.isBefore(targetDate) || startDate.isEqual(targetDate)) {
-			dateList.add(startDate.format(formatter));
+			dateList.add(startDate.format(DATE_FORMATTER));
 			startDate = startDate.plusDays(1);
 		}
 
@@ -105,6 +105,9 @@ public class EplMatchCrawler implements MatchCrawler {
 		for (WebElement match : getMatchList(league)) {
 			List<WebElement> teamNames = getTeamNames(match);
 			List<WebElement> teamLogos = getTeamLogos(match);
+
+			log.info("{} {} {} {} {} {}" + BLANK + "{}", teamNames.get(0).getText(), getLogoImg(teamLogos.get(0)),
+				teamNames.get(1).getText(), getLogoImg(teamLogos.get(1)), getPlace(match), date, getMatchTime(match));
 
 			save(teamNames.get(0).getText(), getLogoImg(teamLogos.get(0)), teamNames.get(1).getText(),
 				getLogoImg(teamLogos.get(1)), getPlace(match), date + BLANK + getMatchTime(match));

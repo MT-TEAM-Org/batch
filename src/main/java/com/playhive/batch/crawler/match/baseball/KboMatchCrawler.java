@@ -37,13 +37,13 @@ public class KboMatchCrawler implements MatchCrawler {
 	private static final String MATCH_CLASS = "MatchBox_match_item__3_D0Q";
 	private static final String MATCH_TIME_CLASS = "MatchBox_time__nIEfd";
 	private static final String MATCH_PLACE = "MatchBox_stadium__13gft";
-	private static final String TEAM_NAME_CLASS = "MatchBoxTeamArea_team__3aB4O";
-	private static final String TEAM_LOGO_CLASS = "MatchBoxTeamArea_emblem__1kpNQ";
+	private static final String TEAM_NAME_CLASS = "MatchBoxHeadToHeadArea_team__40JQL";
+	private static final String TEAM_LOGO_CLASS = "MatchBoxHeadToHeadArea_emblem__15NcN";
 
 	private static final String IMG_TAG = "img";
 	private static final String SRC_ATTR = "src";
 
-	private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
+	private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 	private static final String KBO_NAME = "KBO리그";
@@ -105,6 +105,9 @@ public class KboMatchCrawler implements MatchCrawler {
 		for (WebElement match : getMatchList(league)) {
 			List<WebElement> teamNames = getTeamNames(match);
 			List<WebElement> teamLogos = getTeamLogos(match);
+
+			log.info("{} {} {} {} {} {}" + BLANK + "{}", teamNames.get(0).getText(), getLogoImg(teamLogos.get(0)),
+				teamNames.get(1).getText(), getLogoImg(teamLogos.get(1)), getPlace(match), date, getMatchTime(match));
 
 			save(teamNames.get(1).getText(), getLogoImg(teamLogos.get(1)), teamNames.get(0).getText(),
 				getLogoImg(teamLogos.get(0)), getPlace(match), date + BLANK + getMatchTime(match));
