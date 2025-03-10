@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class GameDiscountCrawler implements GameCrawler {
 
-    private static final String URL = "https://store.steampowered.com";
+    private static final String URL = "https://store.steampowered.com?l=koreana";
 
     private static final String TRIGGER_TAB = "#tab_specials_content_trigger";
     private static final String JAVASCRIPT_CLICK = "arguments[0].click();";
