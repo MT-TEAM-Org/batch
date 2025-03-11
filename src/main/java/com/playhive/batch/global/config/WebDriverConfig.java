@@ -20,6 +20,7 @@ public class WebDriverConfig {
 		options.addArguments("--ignore-ssl-errors=yes");
 		// 인증서 오류 무시 설정: 모든 인증서 오류를 무시하고 브라우저를 실행
 		options.addArguments("--ignore-certificate-errors");
+		options.addArguments("--window-size=1200,800");
 
 		return new ChromeDriver(options);
 	}
