@@ -2,7 +2,6 @@ package com.playhive.batch.job;
 
 import com.playhive.batch.crawler.game.GameCrawler;
 import com.playhive.batch.job.listener.JobLoggerListener;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -22,7 +21,7 @@ public class GameCrawlJobConfig {
     private static final String GAME_CRAWL_JOB_NAME = "gameCrawlJob";
     private static final String GAME_CRAWL_STEP_NAME = "gameCrawlStep";
 
-    private final List<GameCrawler> gameCrawlers;
+    private final GameCrawler gameCrawler;
 
     @Bean
     public Job gameCrawlJob(JobRepository jobRepository, Step gameCrawlStep) {
@@ -43,9 +42,7 @@ public class GameCrawlJobConfig {
     @Bean
     public Tasklet gameTasklet() {
         return (contribution, chunkContext) -> {
-            for (GameCrawler crawler : gameCrawlers) {
-                crawler.crawl();
-            }
+            gameCrawler.crawl();
             return RepeatStatus.FINISHED;
         };
     }
