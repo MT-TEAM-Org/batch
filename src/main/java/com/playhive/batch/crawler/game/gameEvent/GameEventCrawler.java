@@ -7,6 +7,7 @@ import com.playhive.batch.global.config.WebDriverConfig;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
@@ -58,24 +59,40 @@ public class GameEventCrawler implements GameCrawler {
         try {
             saveEvent();
         } catch (Exception e) {
-            log.error("Error occurred while crawling events", e.getMessage());
+            log.error("Error occurred while crawling events: {}", e.getMessage(), e);
         }
     }
 
     private void saveEvent() {
         for (WebElement event : getEventList()) {
             try {
-                saveGameEvent(getThumbImg(event), getTitle(event), getDescription(event), getPeriod(event),
-                        getLink(event));
+
+                // 노출 기간
+                LocalDateTime exposureDate = LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.MIDNIGHT);
+
+                String period = getPeriod(event);
+
+                // period에 "마감임박" 텍스트가 포함되어 있으면 검사 진행
+                if (period.contains("마감임박")) {
+                    LocalDate eventEndDate = extractEndDate(period);
+
+                    // 마감일이 exposureDate보다 과거라면 저장하지 않음
+                    if (eventEndDate.isBefore(exposureDate.toLocalDate())) {
+                        log.info("노출기간 기준(현재보다 하루 뒤 날짜)으로 지난 이벤트로 크롤링 건너뛰기: {}", period);
+                        continue;
+                    }
+                }
+
+                saveGameEvent(getThumbImg(event), getTitle(event), getDescription(event), period,
+                        getLink(event), exposureDate);
             } catch (Exception e) {
                 log.error("Error while processing event: {}", e.getMessage(), e);
             }
         }
     }
 
-    private void saveGameEvent(String thumbImg, String title, String description, String period, String link) {
-        // 노출 기간
-        LocalDateTime exposureDate = LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.MIDNIGHT);
+    private void saveGameEvent(String thumbImg, String title, String description, String period, String link,
+                               LocalDateTime exposureDate) {
         gameEventService.saveGameEvent(
                 GameEventSaveRequest.createRequest(thumbImg, title, description, period, link, exposureDate));
     }
@@ -90,6 +107,16 @@ public class GameEventCrawler implements GameCrawler {
 
     private String getPeriod(WebElement event) {
         return event.findElement(By.className(EVENT_PERIOD)).getText();
+    }
+
+    private LocalDate extractEndDate(String period) {
+        // "YYYY-MM-DD ~ YYYY-MM-DD 마감임박" 형식에서 마감일 추출
+        String[] parts = period.split(" ~ ");
+        if (parts.length < 2) {
+            throw new IllegalArgumentException("Invalid event period format: " + period);
+        }
+        String endDateStr = parts[1].split(" ")[0]; // 마감임박 제거
+        return LocalDate.parse(endDateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     }
 
     private String getThumbImg(WebElement event) {
