@@ -3,16 +3,15 @@ package com.playhive.batch.crawler.game.gameEvent;
 import com.playhive.batch.crawler.game.GameCrawler;
 import com.playhive.batch.game.gameEvent.dto.GameEventSaveRequest;
 import com.playhive.batch.game.gameEvent.service.GameEventService;
-import com.playhive.batch.global.config.WebDriverConfig;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,25 +19,18 @@ import org.springframework.stereotype.Component;
 public class GameEventCrawler implements GameCrawler {
 
     private static final String URL = "https://event.nexon.com/event/ongoinglist.aspx";
-
     private static final String EVENT_LIST_CLASS = "eventList";
     private static final String LI_EVENT_ITEM = "eventItem";
-    // 링크
     private static final String A_TAG = "a";
     private static final String HREF_ATTR = "href";
-    // 썸네일 이미지
     private static final String SPAN_EVENT_IMG = "eventImg";
     private static final String IMG_TAG = "img";
     private static final String SRC_ATTR = "src";
-    // 이벤트 제목
     private static final String EVENT_TITLE = "eventTit";
-    // 이벤트 소개
     private static final String EVENT_DESCRIPTION = "eventCnts";
-    // 이벤트 기간
     private static final String EVENT_PERIOD = "eventPeriod";
 
     private final GameEventService gameEventService;
-    private WebDriver webDriver;
 
     public GameEventCrawler(GameEventService gameEventService) {
         this.gameEventService = gameEventService;
@@ -47,26 +39,28 @@ public class GameEventCrawler implements GameCrawler {
     @Override
     public void crawl() {
         try {
-            webDriver = WebDriverConfig.createDriver();
             crawlGameEvent();
-        } finally {
-            webDriver.quit();
-        }
-    }
-
-    private void crawlGameEvent() {
-        webDriver.get(URL);
-        try {
-            saveEvent();
         } catch (Exception e) {
             log.error("Error occurred while crawling events: {}", e.getMessage(), e);
         }
     }
 
-    private void saveEvent() {
-        for (WebElement event : getEventList()) {
-            try {
+    private void crawlGameEvent() {
+        try {
+            // HTML 문서 요청 및 파싱
+            Document document = Jsoup.connect(URL).get();
+            saveEvent(document);
+        } catch (Exception e) {
+            log.error("Error occurred while crawling events: {}", e.getMessage(), e);
+        }
+    }
 
+    private void saveEvent(Document document) {
+        // 이벤트 목록 가져오기
+        Elements eventList = document.select("." + EVENT_LIST_CLASS + " > ." + LI_EVENT_ITEM);
+
+        for (Element event : eventList) {
+            try {
                 // 노출 기간
                 LocalDateTime exposureDate = LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.MIDNIGHT);
 
@@ -97,16 +91,16 @@ public class GameEventCrawler implements GameCrawler {
                 GameEventSaveRequest.createRequest(thumbImg, title, description, period, link, exposureDate));
     }
 
-    private String getTitle(WebElement event) {
-        return event.findElement(By.className(EVENT_TITLE)).getText();
+    private String getTitle(Element event) {
+        return event.select("." + EVENT_TITLE).text();
     }
 
-    private String getDescription(WebElement event) {
-        return event.findElement(By.className(EVENT_DESCRIPTION)).getText();
+    private String getDescription(Element event) {
+        return event.select("." + EVENT_DESCRIPTION).text();
     }
 
-    private String getPeriod(WebElement event) {
-        return event.findElement(By.className(EVENT_PERIOD)).getText();
+    private String getPeriod(Element event) {
+        return event.select("." + EVENT_PERIOD).text();
     }
 
     private LocalDate extractEndDate(String period) {
@@ -119,16 +113,11 @@ public class GameEventCrawler implements GameCrawler {
         return LocalDate.parse(endDateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     }
 
-    private String getThumbImg(WebElement event) {
-        return event.findElement(By.className(SPAN_EVENT_IMG)).findElement(By.tagName(IMG_TAG)).getAttribute(SRC_ATTR);
+    private String getThumbImg(Element event) {
+        return event.select("." + SPAN_EVENT_IMG + " > " + IMG_TAG).attr(SRC_ATTR);
     }
 
-    private String getLink(WebElement event) {
-        return event.findElement(By.tagName(A_TAG)).getAttribute(HREF_ATTR);
-    }
-
-    private List<WebElement> getEventList() {
-        WebElement eventListElement = webDriver.findElement(By.className(EVENT_LIST_CLASS));
-        return eventListElement.findElements(By.className(LI_EVENT_ITEM));
+    private String getLink(Element event) {
+        return event.select(A_TAG).attr(HREF_ATTR);
     }
 }
