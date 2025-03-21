@@ -10,6 +10,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.playhive.batch.crawler.team.TeamCrawler;
 import com.playhive.batch.global.config.WebDriverConfig;
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
+@Transactional
 public class EplTeamCrawler implements TeamCrawler {
 
 	private static final String URL = "https://m.sports.naver.com/wfootball/record/epl?seasonCode=TxzT&tab=teamRank";
