@@ -38,6 +38,7 @@ public class EsportsNewsCrawler implements NewsCrawler {
 	private static final String TITLE_CLASS = "news_card_title__1fVVk";
 	private static final String LOAD_NEWS_CLASS = "news_list_more_btn__3QwSl";
 	private static final String CONTENT_CLASS = "news_card_subcontent__23_y1";
+	private static final String PAGE_LIST_CLASS = "news_paging_list__38qR4";
 
 	private static final String LI_TAG = "li.news_card_item__2lh4o";
 	private static final String SVG_TAG = "svg";
@@ -47,7 +48,7 @@ public class EsportsNewsCrawler implements NewsCrawler {
 	private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
 
 	private static final String TIME_PATTERN = "(\\d+)\\s*(분|시간)\\s*전";
-	private static final String DATE_BTN_PATTERN = "MM.dd(EEE)";
+	private static final String DATE_BTN_PATTERN = "MM.dd";
 
 	private static final String MINUTE_KOREAN = "분";
 	private static final String HOUR_KOREAN = "시간";
@@ -88,7 +89,7 @@ public class EsportsNewsCrawler implements NewsCrawler {
 		if (isYesterday) {
 			String dateLinkText = date.format(DateTimeFormatter.ofPattern(DATE_BTN_PATTERN));
 			try {
-				webDriver.findElement(By.linkText(dateLinkText)).click();
+				webDriver.findElement(By.className(PAGE_LIST_CLASS)).findElement(By.partialLinkText(dateLinkText)).click();
 			} catch (NoSuchElementException e) {
 				log.error("{} Element not found", dateLinkText, e);
 			}
