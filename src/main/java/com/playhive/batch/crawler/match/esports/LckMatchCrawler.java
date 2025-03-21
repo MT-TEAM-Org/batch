@@ -1,6 +1,7 @@
-package com.playhive.batch.crawler.match.football;
+package com.playhive.batch.crawler.match.esports;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -30,25 +31,23 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class EplMatchCrawler implements MatchCrawler {
+public class LckMatchCrawler implements MatchCrawler {
 
-	private static final String URL = "https://m.sports.naver.com/wfootball/schedule/index?date=";
+	private static final String URL = "https://game.naver.com/esports/League_of_Legends/schedule/lck?date=";
 
-	private static final String LEAGUE_CLASS = "ScheduleAllType_match_list_group__1nFDy";
-	private static final String LEAGUE_NAME = "ScheduleAllType_title___Qfd4";
-	private static final String MATCH_CLASS = "MatchBox_match_item__3_D0Q";
-	private static final String MATCH_TIME_CLASS = "MatchBox_time__nIEfd";
-	private static final String MATCH_PLACE = "MatchBox_stadium__13gft";
-	private static final String TEAM_NAME_CLASS = "MatchBoxHeadToHeadArea_team__40JQL";
-	private static final String TEAM_LOGO_CLASS = "MatchBoxHeadToHeadArea_emblem__15NcN";
+	private static final String DATE_GROUP_CLASS = "card_item__3Covz";
+	private static final String MATCH_CLASS = "row_item__dbJjy";
+	private static final String MATCH_DATE_CLASS = "card_date__1kdC3";
+	private static final String MATCH_TIME_CLASS = "row_time__28bwr";
+	private static final String MATCH_PLACE = "row_stadium__UOBaJ";
+	private static final String TEAM_NAME_CLASS = "row_name__IDFHz";
+	private static final String TEAM_LOGO_CLASS = "row_logo__c8gh0";
 
-	private static final String IMG_TAG = "img";
 	private static final String SRC_ATTR = "src";
 
 	private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-	private static final String EPL_NAME = "프리미어리그";
 	private static final String BLANK = " ";
 
 	private final MatchService matchService;
@@ -66,7 +65,7 @@ public class EplMatchCrawler implements MatchCrawler {
 			try {
 				webDriver.get(URL + date);
 				WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(10));
-				wait.until(ExpectedConditions.visibilityOfElementLocated(By.className(LEAGUE_CLASS)));
+				wait.until(ExpectedConditions.visibilityOfElementLocated(By.className(DATE_GROUP_CLASS)));
 				saveMatch(date);
 			} catch (TimeoutException e) {
 				log.error("페이지를 찾을수없습니다.");
@@ -91,32 +90,53 @@ public class EplMatchCrawler implements MatchCrawler {
 		return dateList;
 	}
 
-	private void saveMatch(String date) {
-		for (WebElement league : getLeagueList()) {
-			confirmEqlLeague(league, date);
+	private void saveMatch(String crawlDate) {
+		for (WebElement date : getDateList()) {
+			confirmLckLeague(date, crawlDate);
 		}
 	}
 
-	private void confirmEqlLeague(WebElement league, String date) {
-		if (getLeagueName(league).equals(EPL_NAME)) {
-			crawlMatch(league, date);
+	private List<WebElement> getDateList() {
+		return webDriver.findElements(By.className(DATE_GROUP_CLASS));
+	}
+
+	private void confirmLckLeague(WebElement date, String crawlDate) {
+		if (isSameDate(date, crawlDate)) {
+			crawlMatch(date, crawlDate);
 		}
 	}
 
-	private void crawlMatch(WebElement league, String date) {
-		for (WebElement match : getMatchList(league)) {
+	private boolean isSameDate(WebElement date, String crawlDate) {
+		String matchDate = getMatchDate(date);
+		String[] monthDayParts = matchDate.split("[월일]");
+		int month = Integer.parseInt(monthDayParts[0].trim());
+		int day = Integer.parseInt(monthDayParts[1].trim());
+
+		String[] crawlDateParts = crawlDate.split("-");
+		int year = Integer.parseInt(crawlDateParts[0]);
+
+		LocalDate parsedDate = LocalDate.of(year, month, day);
+		LocalDate expectedDate = LocalDate.parse(crawlDate);
+
+		return parsedDate.isEqual(expectedDate);
+	}
+
+	private void crawlMatch(WebElement date, String crawlDate) {
+		for (WebElement match : getMatchList(date)) {
 			List<WebElement> teamNames = getTeamNames(match);
 			List<WebElement> teamLogos = getTeamLogos(match);
 
 			log.info("{} {} {} {} {} {}" + BLANK + "{}", teamNames.get(0).getText(), getLogoImg(teamLogos.get(0)),
-				teamNames.get(1).getText(), getLogoImg(teamLogos.get(1)), getPlace(match), date, getMatchTime(match));
+				teamNames.get(1).getText(), getLogoImg(teamLogos.get(1)), getPlace(match), crawlDate,
+				getMatchTime(match));
 
-			save(teamNames.get(0).getText(), getLogoImg(teamLogos.get(0)), teamNames.get(1).getText(),
-				getLogoImg(teamLogos.get(1)), getPlace(match), date + BLANK + getMatchTime(match));
+			save(teamNames.get(1).getText(), getLogoImg(teamLogos.get(1)), teamNames.get(0).getText(),
+				getLogoImg(teamLogos.get(0)), getPlace(match), crawlDate + BLANK + getMatchTime(match));
 		}
 	}
 
-	private void save(String homeTeamName, String homeTeamLogo, String awayTeamName, String awayTeamLogo, String place,
+	private void save(String homeTeamName, String homeTeamLogo, String awayTeamName, String awayTeamLogo, String
+		place,
 		String startDate) {
 		this.matchService.save(MatchServiceRequest.createRequest(
 			homeTeamName,
@@ -124,16 +144,12 @@ public class EplMatchCrawler implements MatchCrawler {
 			awayTeamName,
 			awayTeamLogo,
 			place,
-			MatchCategory.FOOTBALL,
+			MatchCategory.ESPORTS,
 			LocalDateTime.parse(startDate, TIME_FORMATTER)));
 	}
 
-	private List<WebElement> getLeagueList() {
-		return webDriver.findElements(By.className(LEAGUE_CLASS));
-	}
-
-	private String getLeagueName(WebElement league) {
-		return league.findElement(By.className(LEAGUE_NAME)).getText();
+	private String getMatchDate(WebElement date) {
+		return date.findElement(By.className(MATCH_DATE_CLASS)).getText();
 	}
 
 	private List<WebElement> getMatchList(WebElement league) {
@@ -158,7 +174,7 @@ public class EplMatchCrawler implements MatchCrawler {
 
 	private String getLogoImg(WebElement logo) {
 		try {
-			return logo.findElement(By.tagName(IMG_TAG)).getAttribute(SRC_ATTR);
+			return logo.getAttribute(SRC_ATTR);
 		} catch (NoSuchElementException e) {
 			return null;
 		}

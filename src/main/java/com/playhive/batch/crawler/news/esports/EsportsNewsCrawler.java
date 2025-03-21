@@ -14,6 +14,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.playhive.batch.crawler.news.NewsCrawler;
 import com.playhive.batch.global.config.WebDriverConfig;
@@ -25,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
+@Transactional
 public class EsportsNewsCrawler implements NewsCrawler {
 
 	private static final String URL = "https://game.naver.com/esports/League_of_Legends/news/lol";

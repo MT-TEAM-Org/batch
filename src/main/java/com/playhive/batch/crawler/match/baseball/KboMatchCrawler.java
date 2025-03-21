@@ -14,6 +14,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.playhive.batch.crawler.match.MatchCrawler;
 import com.playhive.batch.global.config.WebDriverConfig;
@@ -28,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class KboMatchCrawler implements MatchCrawler {
 
 	private static final String URL = "https://m.sports.naver.com/kbaseball/schedule/index?date=";
