@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-@Transactional
 public class Scheduler {
 
 	private final Job newsCrawlJob;
