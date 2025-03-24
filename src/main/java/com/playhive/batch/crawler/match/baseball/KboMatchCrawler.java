@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.playhive.batch.crawler.match.MatchCrawler;
 import com.playhive.batch.global.config.WebDriverConfig;
+import com.playhive.batch.match.match.domain.LeagueName;
 import com.playhive.batch.match.match.domain.MatchCategory;
 import com.playhive.batch.match.match.dto.service.request.MatchServiceRequest;
 import com.playhive.batch.match.match.service.MatchReadService;
@@ -124,8 +125,10 @@ public class KboMatchCrawler implements MatchCrawler {
 			awayTeamName,
 			awayTeamLogo,
 			place,
+			LeagueName.KBO.getName(),
 			MatchCategory.BASEBALL,
-			LocalDateTime.parse(startDate, TIME_FORMATTER)));
+			LocalDateTime.parse(startDate, TIME_FORMATTER),
+			LocalDateTime.parse(startDate, TIME_FORMATTER).plusMinutes(240)));
 	}
 
 	private List<WebElement> getLeagueList() {
