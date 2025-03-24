@@ -34,28 +34,24 @@ public class Match extends BaseTime {
 
 	private String place;
 
+	private String leagueName;
+
 	@Enumerated(EnumType.STRING)
 	private MatchCategory category;
 
 	private LocalDateTime startTime;
 
+	private LocalDateTime endTime;
+
 	@Builder
-	public Match(Long id, Team homeTeam, Team awayTeam, String place, MatchCategory category, LocalDateTime startTime) {
+	public Match(Long id, Team homeTeam, Team awayTeam, String place, String leagueName, MatchCategory category, LocalDateTime startTime, LocalDateTime endTime) {
 		this.id = id;
 		this.homeTeam = homeTeam;
 		this.awayTeam = awayTeam;
 		this.place = place;
+		this.leagueName = leagueName;
 		this.category = category;
 		this.startTime = startTime;
-	}
-
-	public static Match createEntity(Team homeTeam, Team awayTeam, String place, MatchCategory category, LocalDateTime startTime) {
-		return Match.builder()
-			.homeTeam(homeTeam)
-			.awayTeam(awayTeam)
-			.place(place)
-			.category(category)
-			.startTime(startTime)
-			.build();
+		this.endTime = endTime;
 	}
 }

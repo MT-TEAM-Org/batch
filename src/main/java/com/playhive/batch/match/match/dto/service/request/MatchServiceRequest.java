@@ -18,20 +18,24 @@ public class MatchServiceRequest {
 	private String awayTeamName;
 	private String awayTeamLogo;
 	private String place;
+	private String leagueName;
 	private MatchCategory category;
 	private LocalDateTime startTime;
+	private LocalDateTime endTime;
 
 	@Builder
 	public MatchServiceRequest(String homeTeamName, String homeTeamLogo, String awayTeamName, String awayTeamLogo,
-		String place, MatchCategory category,
-		LocalDateTime startTime) {
+		String place, String leagueName, MatchCategory category,
+		LocalDateTime startTime, LocalDateTime endTime) {
 		this.homeTeamName = homeTeamName;
 		this.homeTeamLogo = homeTeamLogo;
 		this.awayTeamName = awayTeamName;
 		this.awayTeamLogo = awayTeamLogo;
 		this.place = place;
+		this.leagueName = leagueName;
 		this.category = category;
 		this.startTime = startTime;
+		this.endTime = endTime;
 	}
 
 	public Match toEntity(Team homeTeam, Team awayTeam) {
@@ -39,22 +43,26 @@ public class MatchServiceRequest {
 			.homeTeam(homeTeam)
 			.awayTeam(awayTeam)
 			.place(place)
+			.leagueName(leagueName)
 			.category(category)
 			.startTime(startTime)
+			.endTime(endTime)
 			.build();
 	}
 
 	public static MatchServiceRequest createRequest(String homeTeamName, String homeTeamLogo,
-		String awayTeamName, String awayTeamLogo, String place, MatchCategory category,
-		LocalDateTime startTime) {
+		String awayTeamName, String awayTeamLogo, String place, String leagueName, MatchCategory category,
+		LocalDateTime startTime, LocalDateTime endTime) {
 		return MatchServiceRequest.builder()
 			.homeTeamName(homeTeamName)
 			.homeTeamLogo(homeTeamLogo)
 			.awayTeamName(awayTeamName)
 			.awayTeamLogo(awayTeamLogo)
 			.place(place)
+			.leagueName(leagueName)
 			.category(category)
 			.startTime(startTime)
+			.endTime(endTime)
 			.build();
 	}
 

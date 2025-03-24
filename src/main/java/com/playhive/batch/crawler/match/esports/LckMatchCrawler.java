@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.playhive.batch.crawler.match.MatchCrawler;
 import com.playhive.batch.global.config.WebDriverConfig;
+import com.playhive.batch.match.match.domain.LeagueName;
 import com.playhive.batch.match.match.domain.MatchCategory;
 import com.playhive.batch.match.match.dto.service.request.MatchServiceRequest;
 import com.playhive.batch.match.match.service.MatchReadService;
@@ -32,9 +33,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Transactional
 public class LckMatchCrawler implements MatchCrawler {
-
 	private static final String URL = "https://game.naver.com/esports/League_of_Legends/schedule/lck?date=";
 
+	private static final String LEAGUE_NAME_CLASS = "row_title__1sdwN";
 	private static final String DATE_GROUP_CLASS = "card_item__3Covz";
 	private static final String MATCH_CLASS = "row_item__dbJjy";
 	private static final String MATCH_DATE_CLASS = "card_date__1kdC3";
@@ -131,12 +132,12 @@ public class LckMatchCrawler implements MatchCrawler {
 				getMatchTime(match));
 
 			save(teamNames.get(1).getText(), getLogoImg(teamLogos.get(1)), teamNames.get(0).getText(),
-				getLogoImg(teamLogos.get(0)), getPlace(match), crawlDate + BLANK + getMatchTime(match));
+				getLogoImg(teamLogos.get(0)), getPlace(match), LeagueName.LCK.getName() + BLANK + getLeagueName(match), crawlDate + BLANK + getMatchTime(match));
 		}
 	}
 
 	private void save(String homeTeamName, String homeTeamLogo, String awayTeamName, String awayTeamLogo, String
-		place,
+		place, String leagueName,
 		String startDate) {
 		this.matchService.save(MatchServiceRequest.createRequest(
 			homeTeamName,
@@ -144,8 +145,10 @@ public class LckMatchCrawler implements MatchCrawler {
 			awayTeamName,
 			awayTeamLogo,
 			place,
+			leagueName,
 			MatchCategory.ESPORTS,
-			LocalDateTime.parse(startDate, TIME_FORMATTER)));
+			LocalDateTime.parse(startDate, TIME_FORMATTER),
+			LocalDateTime.parse(startDate, TIME_FORMATTER).plusMinutes(160)));
 	}
 
 	private String getMatchDate(WebElement date) {
@@ -162,6 +165,10 @@ public class LckMatchCrawler implements MatchCrawler {
 
 	private String getPlace(WebElement match) {
 		return match.findElement(By.className(MATCH_PLACE)).getAttribute("innerText").replace("경기장\n", "");
+	}
+
+	private String getLeagueName(WebElement match) {
+		return match.findElement(By.className(LEAGUE_NAME_CLASS)).getText();
 	}
 
 	private List<WebElement> getTeamNames(WebElement team) {
