@@ -15,14 +15,12 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.playhive.batch.crawler.match.MatchCrawler;
 import com.playhive.batch.global.config.WebDriverConfig;
 import com.playhive.batch.match.match.domain.LeagueName;
 import com.playhive.batch.match.match.domain.MatchCategory;
 import com.playhive.batch.match.match.dto.service.request.MatchServiceRequest;
-import com.playhive.batch.match.match.service.MatchReadService;
 import com.playhive.batch.match.match.service.MatchService;
 
 import lombok.RequiredArgsConstructor;
@@ -31,7 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
 public class LckMatchCrawler implements MatchCrawler {
 	private static final String URL = "https://game.naver.com/esports/League_of_Legends/schedule/lck?date=";
 
@@ -52,17 +49,16 @@ public class LckMatchCrawler implements MatchCrawler {
 	private static final String BLANK = " ";
 
 	private final MatchService matchService;
-	private final MatchReadService matchReadService;
 	private WebDriver webDriver;
 
 	@Override
-	public void crawl() {
-		crawlMatch();
+	public void crawl(LocalDateTime recentDate) {
+		crawlMatch(recentDate);
 	}
 
-	private void crawlMatch() {
+	private void crawlMatch(LocalDateTime recentDate) {
 		webDriver = WebDriverConfig.createDriver();
-		for (String date : getCrawlDate()) {
+		for (String date : getCrawlDate(recentDate)) {
 			try {
 				webDriver.get(URL + date);
 				WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(10));
@@ -70,13 +66,14 @@ public class LckMatchCrawler implements MatchCrawler {
 				saveMatch(date);
 			} catch (TimeoutException e) {
 				log.error("페이지를 찾을수없습니다.");
+			} catch (RuntimeException e) {
+				log.error(e.getMessage());
 			}
 		}
 		webDriver.quit();
 	}
 
-	public List<String> getCrawlDate() {
-		LocalDateTime recentDate = matchReadService.getLatestMatchStartTime();
+	public List<String> getCrawlDate(LocalDateTime recentDate) {
 		LocalDateTime targetDate = LocalDateTime.now().plusWeeks(1);
 
 		List<String> dateList = new ArrayList<>();
@@ -131,8 +128,9 @@ public class LckMatchCrawler implements MatchCrawler {
 				teamNames.get(1).getText(), getLogoImg(teamLogos.get(1)), getPlace(match), crawlDate,
 				getMatchTime(match));
 
-			save(teamNames.get(1).getText(), getLogoImg(teamLogos.get(1)), teamNames.get(0).getText(),
-				getLogoImg(teamLogos.get(0)), getPlace(match), LeagueName.LCK.getName() + BLANK + getLeagueName(match), crawlDate + BLANK + getMatchTime(match));
+ 			save(teamNames.get(1).getText(), getLogoImg(teamLogos.get(1)), teamNames.get(0).getText(),
+				getLogoImg(teamLogos.get(0)), getPlace(match), LeagueName.LCK.getName() + BLANK + getLeagueName(match),
+				crawlDate + BLANK + getMatchTime(match));
 		}
 	}
 

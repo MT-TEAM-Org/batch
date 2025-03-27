@@ -30,9 +30,9 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class EplMatchCrawler implements MatchCrawler {
+public class KLeagueMatchCrawler implements MatchCrawler {
 
-	private static final String URL = "https://m.sports.naver.com/wfootball/schedule/index?date=";
+	private static final String URL = "https://m.sports.naver.com/kfootball/schedule/index?date=";
 
 	private static final String ROUND = "MatchBox_add_info__399jN";
 	private static final String LEAGUE_CLASS = "ScheduleAllType_match_list_group__1nFDy";
@@ -49,7 +49,7 @@ public class EplMatchCrawler implements MatchCrawler {
 	private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-	private static final String EPL_NAME = "프리미어리그";
+	private static final String K_LEAGUE_NAME = "K리그1";
 	private static final String BLANK = " ";
 
 	private final MatchService matchService;
@@ -64,7 +64,8 @@ public class EplMatchCrawler implements MatchCrawler {
 		webDriver = WebDriverConfig.createDriver();
 		for (String date : getCrawlDate(recentDate)) {
 			try {
-				webDriver.get(URL + date);
+				String asd = URL + date;
+				webDriver.get(asd);
 				WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(10));
 				wait.until(ExpectedConditions.visibilityOfElementLocated(By.className(LEAGUE_CLASS)));
 				saveMatch(date);
@@ -94,12 +95,12 @@ public class EplMatchCrawler implements MatchCrawler {
 
 	private void saveMatch(String date) {
 		for (WebElement league : getLeagueList()) {
-			confirmEqlLeague(league, date);
+			confirmKLeague(league, date);
 		}
 	}
 
-	private void confirmEqlLeague(WebElement league, String date) {
-		if (getLeagueName(league).equals(EPL_NAME)) {
+	private void confirmKLeague(WebElement league, String date) {
+		if (getLeagueName(league).equals(K_LEAGUE_NAME)) {
 			crawlMatch(league, date);
 		}
 	}
@@ -113,7 +114,7 @@ public class EplMatchCrawler implements MatchCrawler {
 				teamNames.get(1).getText(), getLogoImg(teamLogos.get(1)), getPlace(match), date, getMatchTime(match));
 
 			save(teamNames.get(0).getText(), getLogoImg(teamLogos.get(0)), teamNames.get(1).getText(),
-				getLogoImg(teamLogos.get(1)), getPlace(match), LeagueName.EPL.getName() + BLANK + getRound(match),
+				getLogoImg(teamLogos.get(1)), getPlace(match), LeagueName.KLEAGUE.getName() + BLANK + getRound(match),
 				date + BLANK + getMatchTime(match));
 		}
 	}
