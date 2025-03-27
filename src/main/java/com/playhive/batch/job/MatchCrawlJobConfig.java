@@ -1,5 +1,6 @@
 package com.playhive.batch.job;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.batch.core.Job;
@@ -12,10 +13,14 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.playhive.batch.crawler.match.MatchCrawler;
+import com.playhive.batch.crawler.match.baseball.KboMatchCrawler;
+import com.playhive.batch.crawler.match.esports.LckMatchCrawler;
 import com.playhive.batch.crawler.news.NewsCrawler;
 import com.playhive.batch.job.listener.JobLoggerListener;
+import com.playhive.batch.match.match.service.MatchReadService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +31,7 @@ public class MatchCrawlJobConfig {
 	private static final String MATCH_CRAWL_JOB_NAME = "matchCrawlJob";
 	private static final String MATCH_CRAWL_STEP_NAME = "matchCrawlStep";
 
+	private final MatchReadService matchReadService;
 	private final List<MatchCrawler> crawlers;
 
 	@Bean
@@ -47,8 +53,9 @@ public class MatchCrawlJobConfig {
 	@Bean
 	public Tasklet matchTasklet() {
 		return (contribution, chunkContext) -> {
+			LocalDateTime recentDate = matchReadService.getLatestMatchStartTime();
 			for (MatchCrawler crawler : crawlers) {
-				crawler.crawl();
+				crawler.crawl(recentDate);
 			}
 			return RepeatStatus.FINISHED;
 		};

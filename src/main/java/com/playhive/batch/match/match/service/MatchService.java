@@ -27,20 +27,21 @@ public class MatchService {
 	public void save(MatchServiceRequest matchServiceRequest) {
 		TeamCategory teamCategory = TeamCategory.fromText(matchServiceRequest.getCategory().getText());
 
-		Team homeTeam = saveTeam(matchServiceRequest.getHomeTeamName(), matchServiceRequest.getHomeTeamLogo(), teamCategory);
-		Team awayTeam = saveTeam(matchServiceRequest.getAwayTeamName(), matchServiceRequest.getHomeTeamLogo(), teamCategory);
+		Team homeTeam = saveTeam(matchServiceRequest.getHomeTeamName(), matchServiceRequest.getHomeTeamLogo(),
+			teamCategory);
+		Team awayTeam = saveTeam(matchServiceRequest.getAwayTeamName(), matchServiceRequest.getHomeTeamLogo(),
+			teamCategory);
 
 		Match match = matchRepository.save(matchServiceRequest.toEntity(homeTeam, awayTeam));
 		matchPredictionService.save(match);
 	}
 
-	private Team saveTeam(String name, String logo, TeamCategory teamCategory) {
-		try {
-			Team team = teamReadService.findByNameAndCategory(name, teamCategory);
-			team.updateLogo(logo);
-			return team;
-		} catch (IllegalArgumentException e) {
+	public Team saveTeam(String name, String logo, TeamCategory teamCategory) {
+		Team team = teamReadService.findByNameAndCategory(name, teamCategory);
+		if (team == null) {
 			return teamRepository.save(Team.createEntity(name, logo, teamCategory));
 		}
+		team.updateLogo(logo);
+		return team;
 	}
 }

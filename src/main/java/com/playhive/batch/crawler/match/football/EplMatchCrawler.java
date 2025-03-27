@@ -21,7 +21,6 @@ import com.playhive.batch.global.config.WebDriverConfig;
 import com.playhive.batch.match.match.domain.LeagueName;
 import com.playhive.batch.match.match.domain.MatchCategory;
 import com.playhive.batch.match.match.dto.service.request.MatchServiceRequest;
-import com.playhive.batch.match.match.service.MatchReadService;
 import com.playhive.batch.match.match.service.MatchService;
 
 import lombok.RequiredArgsConstructor;
@@ -54,17 +53,16 @@ public class EplMatchCrawler implements MatchCrawler {
 	private static final String BLANK = " ";
 
 	private final MatchService matchService;
-	private final MatchReadService matchReadService;
 	private WebDriver webDriver;
 
 	@Override
-	public void crawl() {
-		crawlMatch();
+	public void crawl(LocalDateTime recentDate) {
+		crawlMatch(recentDate);
 	}
 
-	private void crawlMatch() {
+	private void crawlMatch(LocalDateTime recentDate) {
 		webDriver = WebDriverConfig.createDriver();
-		for (String date : getCrawlDate()) {
+		for (String date : getCrawlDate(recentDate)) {
 			try {
 				webDriver.get(URL + date);
 				WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(10));
@@ -72,13 +70,14 @@ public class EplMatchCrawler implements MatchCrawler {
 				saveMatch(date);
 			} catch (TimeoutException e) {
 				log.error("페이지를 찾을수없습니다.");
+			} catch (RuntimeException e) {
+				log.error(e.getMessage());
 			}
 		}
 		webDriver.quit();
 	}
 
-	public List<String> getCrawlDate() {
-		LocalDateTime recentDate = matchReadService.getLatestMatchStartTime();
+	public List<String> getCrawlDate(LocalDateTime recentDate) {
 		LocalDateTime targetDate = LocalDateTime.now().plusWeeks(1);
 
 		List<String> dateList = new ArrayList<>();
@@ -114,11 +113,13 @@ public class EplMatchCrawler implements MatchCrawler {
 				teamNames.get(1).getText(), getLogoImg(teamLogos.get(1)), getPlace(match), date, getMatchTime(match));
 
 			save(teamNames.get(0).getText(), getLogoImg(teamLogos.get(0)), teamNames.get(1).getText(),
-				getLogoImg(teamLogos.get(1)), getPlace(match), LeagueName.EPL.getName() + BLANK + getRound(match), date + BLANK + getMatchTime(match));
+				getLogoImg(teamLogos.get(1)), getPlace(match), LeagueName.EPL.getName() + BLANK + getRound(match),
+				date + BLANK + getMatchTime(match));
 		}
 	}
 
-	private void save(String homeTeamName, String homeTeamLogo, String awayTeamName, String awayTeamLogo, String place, String leagueName,
+	private void save(String homeTeamName, String homeTeamLogo, String awayTeamName, String awayTeamLogo, String place,
+		String leagueName,
 		String startDate) {
 		this.matchService.save(MatchServiceRequest.createRequest(
 			homeTeamName,
