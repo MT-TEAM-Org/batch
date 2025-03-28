@@ -29,7 +29,7 @@ public class MatchService {
 
 		Team homeTeam = saveTeam(matchServiceRequest.getHomeTeamName(), matchServiceRequest.getHomeTeamLogo(),
 			teamCategory);
-		Team awayTeam = saveTeam(matchServiceRequest.getAwayTeamName(), matchServiceRequest.getHomeTeamLogo(),
+		Team awayTeam = saveTeam(matchServiceRequest.getAwayTeamName(), matchServiceRequest.getAwayTeamLogo(),
 			teamCategory);
 
 		Match match = matchRepository.save(matchServiceRequest.toEntity(homeTeam, awayTeam));
