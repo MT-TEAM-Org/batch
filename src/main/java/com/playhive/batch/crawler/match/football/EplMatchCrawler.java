@@ -34,7 +34,6 @@ public class EplMatchCrawler implements MatchCrawler {
 
 	private static final String URL = "https://m.sports.naver.com/wfootball/schedule/index?date=";
 
-	private static final String ROUND = "MatchBox_add_info__399jN";
 	private static final String LEAGUE_CLASS = "ScheduleAllType_match_list_group__1nFDy";
 	private static final String LEAGUE_NAME = "ScheduleAllType_title___Qfd4";
 	private static final String MATCH_CLASS = "MatchBox_match_item__3_D0Q";
@@ -113,7 +112,7 @@ public class EplMatchCrawler implements MatchCrawler {
 				teamNames.get(1).getText(), getLogoImg(teamLogos.get(1)), getPlace(match), date, getMatchTime(match));
 
 			save(teamNames.get(0).getText(), getLogoImg(teamLogos.get(0)), teamNames.get(1).getText(),
-				getLogoImg(teamLogos.get(1)), getPlace(match), LeagueName.EPL.getName() + BLANK + getRound(match),
+				getLogoImg(teamLogos.get(1)), getPlace(match), LeagueName.EPL.getName(),
 				date + BLANK + getMatchTime(match));
 		}
 	}
@@ -151,10 +150,6 @@ public class EplMatchCrawler implements MatchCrawler {
 
 	private String getPlace(WebElement match) {
 		return match.findElement(By.className(MATCH_PLACE)).getAttribute("innerText").replace("경기장\n", "");
-	}
-
-	private String getRound(WebElement match) {
-		return match.findElement(By.className(ROUND)).getText();
 	}
 
 	private List<WebElement> getTeamNames(WebElement team) {

@@ -34,7 +34,6 @@ import lombok.extern.slf4j.Slf4j;
 public class WclMatchCrawler implements MatchCrawler {
 	private static final String URL = "https://game.naver.com/esports/League_of_Legends/schedule/world_championship?date=";
 
-	private static final String LEAGUE_NAME_CLASS = "row_title__1sdwN";
 	private static final String DATE_GROUP_CLASS = "card_item__3Covz";
 	private static final String MATCH_CLASS = "row_item__dbJjy";
 	private static final String MATCH_DATE_CLASS = "card_date__1kdC3";
@@ -131,7 +130,7 @@ public class WclMatchCrawler implements MatchCrawler {
 				getMatchTime(match));
 
 			save(teamNames.get(1).getText(), getLogoImg(teamLogos.get(1)), teamNames.get(0).getText(),
-				getLogoImg(teamLogos.get(0)), getPlace(match), LeagueName.WCL.getName() + BLANK + getLeagueName(match),
+				getLogoImg(teamLogos.get(0)), getPlace(match), LeagueName.WCL.getName(),
 				crawlDate + BLANK + getMatchTime(match));
 		}
 	}
@@ -165,10 +164,6 @@ public class WclMatchCrawler implements MatchCrawler {
 
 	private String getPlace(WebElement match) {
 		return match.findElement(By.className(MATCH_PLACE)).getAttribute("innerText").replace("경기장\n", "");
-	}
-
-	private String getLeagueName(WebElement match) {
-		return match.findElement(By.className(LEAGUE_NAME_CLASS)).getText();
 	}
 
 	private List<WebElement> getTeamNames(WebElement team) {
