@@ -69,13 +69,13 @@ jobs:
           username: ${{ secrets.AWS_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            echo "Java가 설치되었는지 확인 중..."
+            echo "Checking if Java is installed..."
             if ! java -version &> /dev/null; then
-              echo "Java가 없습니다. OpenJDK 17을 설치하는 중..."
-              sudo yum update -y
-              sudo yum install -y java-17-openjdk
+              echo "Java not found. Installing OpenJDK 17..."
+              sudo apt update
+              sudo apt install -y openjdk-17-jdk
             else
-              echo "Java가 이미 설치되어 있습니다."
+              echo "Java is already installed."
             fi
 
       - name: Deploy to AWS and Restart Services with Docker Compose
@@ -97,8 +97,8 @@ jobs:
             # Docker 설치 여부 확인
             if ! docker --version &>/dev/null; then
               echo "Docker is not installed. Installing Docker..."
-              sudo yum update
-              sudo yum install -y docker.io
+              sudo apt-get update
+              sudo apt-get install -y docker.io
               sudo systemctl start docker
               sudo systemctl enable docker
             else
@@ -108,8 +108,8 @@ jobs:
             # Docker Compose 설치 여부 확인
             if ! docker-compose --version &>/dev/null; then
               echo "Docker Compose is not installed. Installing Docker Compose..."
-              sudo yum update
-              sudo yum install -y docker-compose
+              sudo apt-get update
+              sudo apt-get install -y docker-compose
             else
               echo "Docker Compose is already installed."
             fi
