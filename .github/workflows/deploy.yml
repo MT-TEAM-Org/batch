@@ -72,8 +72,8 @@ jobs:
             echo "Checking if Java is installed..."
             if ! java -version &> /dev/null; then
               echo "Java not found. Installing OpenJDK 17..."
-              sudo apt update
-              sudo apt install -y openjdk-17-jdk
+              sudo yum update
+              sudo yum install -y openjdk-17-jdk
             else
               echo "Java is already installed."
             fi
