@@ -97,8 +97,8 @@ jobs:
             # Docker 설치 여부 확인
             if ! docker --version &>/dev/null; then
               echo "Docker is not installed. Installing Docker..."
-              sudo apt-get update
-              sudo apt-get install -y docker.io
+              sudo yum update
+              sudo yum install -y docker.io
               sudo systemctl start docker
               sudo systemctl enable docker
             else
@@ -108,8 +108,8 @@ jobs:
             # Docker Compose 설치 여부 확인
             if ! docker-compose --version &>/dev/null; then
               echo "Docker Compose is not installed. Installing Docker Compose..."
-              sudo apt-get update
-              sudo apt-get install -y docker-compose
+              sudo yum update
+              sudo yum install -y docker-compose
             else
               echo "Docker Compose is already installed."
             fi
