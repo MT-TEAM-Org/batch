@@ -69,13 +69,13 @@ jobs:
           username: ${{ secrets.AWS_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            echo "Checking if Java is installed..."
+            echo "Java가 설치되었는지 확인 중..."
             if ! java -version &> /dev/null; then
-              echo "Java not found. Installing OpenJDK 17..."
-              sudo yum update
-              sudo yum install -y openjdk-17-jdk
+              echo "Java가 없습니다. OpenJDK 17을 설치하는 중..."
+              sudo yum update -y
+              sudo yum install -y java-17-openjdk
             else
-              echo "Java is already installed."
+              echo "Java가 이미 설치되어 있습니다."
             fi
 
       - name: Deploy to AWS and Restart Services with Docker Compose
