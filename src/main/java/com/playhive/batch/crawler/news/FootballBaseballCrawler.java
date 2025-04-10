@@ -23,19 +23,22 @@ public abstract class FootballBaseballCrawler {
 	private static final String EQUALS = "=";
 	private static final String PAGE_FIELD = "&page";
 
-	private static final String NEWS_LIST_CLASS = "news_list";
+	private static final String NEWS_SECTION_LIST_CLASS = "NewsList_comp_news_list__oXAbN";
+	private static final String NEWS_LIST_CLASS = "NewsItem_news_item__fhEmd";
 	private static final String TIME_CLASS = "time";
-	private static final String TITLE_CLASS = "text";
-	private static final String THUMB_CLASS = "thmb";
-	private static final String PAGE_CLASS = "paginate";
+	private static final String TITLE_CLASS = "NewsItem_title__BXkJ6";
+	private static final String THUMB_CLASS = "NewsItem_image_wrap__m-fHo";
+	private static final String PAGE_CLASS = "Pagination_pagination_list__4LIj7";
 	private static final String SOURCE_CLASS = "press";
-	private static final String CONTENT_CLASS = "desc";
+	private static final String CONTENT_CLASS = "NewsItem_description__+gwua";
 
+	private static final String UL_TAG = "ul";
 	private static final String LI_TAG = "li";
 	private static final String SPAN_TAG = "span";
 	private static final String IMG_TAG = "img";
 	private static final String SRC_ATTR = "src";
 	private static final String A_TAG = "a";
+	private static final String BUTTON_TAG = "button";
 	private static final String HREF_ATTR = "href";
 
 	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
@@ -50,22 +53,25 @@ public abstract class FootballBaseballCrawler {
 
 	protected void crawlForDate(String url, LocalDate date, boolean isYesterday, NewsCategory category) {
 		webDriver = WebDriverConfig.createDriver();
-		IntStream.rangeClosed(1, getPaginationCount(url, date)).forEach(pageCount -> {
-			webDriver.get(url + DATE_FIELD + EQUALS + date.format(FORMATTER) + PAGE_FIELD + EQUALS + pageCount);
+		webDriver.get(url + DATE_FIELD + EQUALS + date.format(FORMATTER));
+		IntStream.rangeClosed(1, getPaginationCount()).forEach(value -> {
+			clickPage(value);
 			saveNews(isYesterday, category);
 		});
 		webDriver.quit();
 	}
 
 	private void saveNews(boolean isYesterday, NewsCategory category) {
-		for (WebElement news : getNewsList()) {
-			String postDate = getPostDate(news);
-			LocalDateTime newsPostDate = LocalDateTime.parse(postDate, TIME_FORMATTER);
-			// 오전 6시 크롤링이기 때문에 전날 뉴스는 오전 6시이후로만 가져오도록
-			if (isYesterday && newsPostDate.toLocalTime().isBefore(LocalTime.of(6, 0))) {
-				continue;
+		for (WebElement section : getNewsSectoinList()) {
+			for (WebElement news : getNewsList(section)) {
+				String postDate = getPostDate(news);
+				LocalDateTime newsPostDate = LocalDateTime.parse(postDate, TIME_FORMATTER);
+				// 오전 6시 크롤링이기 때문에 전날 뉴스는 오전 6시이후로만 가져오도록
+				if (isYesterday && newsPostDate.toLocalTime().isBefore(LocalTime.of(6, 0))) {
+					continue;
+				}
+				saveNews(getTitle(news), getThumbImg(news), getSource(news), getContent(news), newsPostDate, category);
 			}
-			saveNews(getTitle(news), getThumbImg(news), getSource(news), getContent(news), newsPostDate, category);
 		}
 	}
 
@@ -74,9 +80,13 @@ public abstract class FootballBaseballCrawler {
 		this.newsService.saveNews(NewsSaveRequest.createRequest(title, thumbImg, source, content, postDate, category));
 	}
 
-	private List<WebElement> getNewsList() {
-		WebElement newsListElement = webDriver.findElement(By.className(NEWS_LIST_CLASS));
-		return newsListElement.findElements(By.tagName(LI_TAG));
+	private List<WebElement> getNewsSectoinList() {
+		WebElement newsSectionListElement = webDriver.findElement(By.className(NEWS_SECTION_LIST_CLASS));
+		return newsSectionListElement.findElements(By.tagName(UL_TAG));
+	}
+
+	private List<WebElement> getNewsList(WebElement section) {
+		return section.findElements(By.className(NEWS_LIST_CLASS));
 	}
 
 	//뉴스 시간가져오기
@@ -86,7 +96,7 @@ public abstract class FootballBaseballCrawler {
 
 	//뉴스 타이틀가져오기
 	private String getTitle(WebElement news) {
-		return news.findElement(By.className(TITLE_CLASS)).findElement(By.tagName(SPAN_TAG)).getText();
+		return news.findElement(By.className(TITLE_CLASS)).getText();
 	}
 
 	//썸네일 이미지 가져오기, 없으면 null
@@ -107,10 +117,14 @@ public abstract class FootballBaseballCrawler {
 	}
 
 	//페이징 개수 가져오기
-	private int getPaginationCount(String url, LocalDate date) {
-		webDriver.get(url + DATE_FIELD + EQUALS + date.format(FORMATTER) + PAGE_FIELD + EQUALS + 1);
+	private int getPaginationCount() {
 		WebElement paginationElement = webDriver.findElement(By.className(PAGE_CLASS));
-		List<WebElement> pageLinks = paginationElement.findElements(By.tagName(A_TAG));
+		List<WebElement> pageLinks = paginationElement.findElements(By.tagName(BUTTON_TAG));
 		return pageLinks.size();
+	}
+
+	private void clickPage(int page) {
+		webDriver.findElement(By.className("Pagination_pagination_list__4LIj7"))
+			.findElement(By.xpath(".//button[text()='" + page + "']")).click();
 	}
 }
