@@ -14,7 +14,7 @@ import com.playhive.batch.news.service.NewsService;
 @Transactional
 public class BaseballNewsCrawler extends FootballBaseballCrawler implements NewsCrawler {
 
-	private static final String URL = "https://m.sports.naver.com/kbaseball/news?sectionId=wbaseball&sort=latest";
+	private static final String URL = "https://m.sports.naver.com/kbaseball/news?sectionId=kbaseball&sort=latest";
 
 	public BaseballNewsCrawler(NewsService newsService) {
 		super(newsService);

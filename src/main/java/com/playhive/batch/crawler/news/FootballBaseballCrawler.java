@@ -1,5 +1,6 @@
 package com.playhive.batch.crawler.news;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -8,9 +9,13 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.playhive.batch.global.config.WebDriverConfig;
 import com.playhive.batch.news.dto.NewsSaveRequest;
@@ -30,6 +35,7 @@ public abstract class FootballBaseballCrawler {
 	private static final String TIME_CLASS = "time";
 	private static final String TITLE_CLASS = "NewsItem_title__BXkJ6";
 	private static final String THUMB_CLASS = "NewsItem_image_wrap__m-fHo";
+	private static final String DETAIL_THUMB_CLASS = "NewsEndMain_article_image__SwnGO";
 	private static final String PAGE_CLASS = "Pagination_pagination_list__4LIj7";
 	private static final String CONTENT_CLASS = "NewsItem_description__+gwua";
 
@@ -53,6 +59,7 @@ public abstract class FootballBaseballCrawler {
 	protected void crawlForDate(String url, LocalDate date, boolean isYesterday, NewsCategory category) {
 		webDriver = WebDriverConfig.createDriver();
 		webDriver.get(url + DATE_FIELD + EQUALS + date.format(FORMATTER));
+
 		IntStream.rangeClosed(1, getPaginationCount()).forEach(value -> {
 			clickPage(value);
 			saveNews(isYesterday, category);
@@ -65,13 +72,47 @@ public abstract class FootballBaseballCrawler {
 			for (WebElement news : getNewsList(section)) {
 				String postDate = getPostDate(news);
 				LocalDateTime newsPostDate = LocalDateTime.parse(postDate, TIME_FORMATTER);
-				// 오전 6시 크롤링이기 때문에 전날 뉴스는 오전 6시이후로만 가져오도록
-				if (isYesterday && newsPostDate.toLocalTime().isBefore(LocalTime.of(6, 0))) {
+				// 오전 5시 크롤링이기 때문에 전날 뉴스는 오전 6시이후로만 가져오도록
+				if (isYesterday && newsPostDate.toLocalTime().isBefore(LocalTime.of(5, 0))) {
 					continue;
 				}
-				saveNews(getTitle(news), getThumbImg(news), getSource(news), getContent(news), newsPostDate, category);
+
+				//뉴스 항목 클릭
+				String newsUrl = getSource(news);
+
+				//새청 열기
+				String originalWindow = openDetailTab(newsUrl);
+
+				// 필요한 데이터 크롤링
+				String thumbImg = getDetailThumbImg(webDriver); // 썸네일 이미지 가져오기
+
+				// 원래 창으로 돌아가기
+				closeDetailTab(originalWindow);
+
+				saveNews(getTitle(news), thumbImg == null ? getThumbImg(news) : thumbImg, newsUrl, getContent(news), newsPostDate, category);
 			}
 		}
+	}
+
+	private String openDetailTab(String newsUrl) {
+		// JavascriptExecutor를 사용하여 새 탭에서 링크 열기
+		String script = "window.open('" + newsUrl + "', '_blank');";
+		((JavascriptExecutor)webDriver).executeScript(script);
+
+		// 새로운 탭으로 전환
+		String originalWindow = webDriver.getWindowHandle();
+		for (String windowHandle : webDriver.getWindowHandles()) {
+			if (!windowHandle.equals(originalWindow)) {
+				webDriver.switchTo().window(windowHandle);
+				break;
+			}
+		}
+		return originalWindow;
+	}
+
+	private void closeDetailTab(String originalWindow) {
+		webDriver.close(); // 새 창 닫기
+		webDriver.switchTo().window(originalWindow); // 원래 창으로 전환
 	}
 
 	private void saveNews(String title, String thumbImg, String source, String content, LocalDateTime postDate,
@@ -99,10 +140,29 @@ public abstract class FootballBaseballCrawler {
 	}
 
 	//썸네일 이미지 가져오기, 없으면 null
+	private String getDetailThumbImg(WebDriver webDriver) {
+		try {
+			// 최대 10초 대기하여 썸네일 이미지 요소가 나타날 때까지 기다리기
+			WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(120));
+			WebElement thumbElement = wait.until(ExpectedConditions.visibilityOfElementLocated(
+				By.className(DETAIL_THUMB_CLASS)
+			));
+
+			return thumbElement.findElement(By.tagName(IMG_TAG)).getAttribute(SRC_ATTR);
+		} catch (NoSuchElementException e) {
+			log.error(e.getMessage());
+			return null;
+		} catch (TimeoutException e) {
+			log.error("Timed out waiting for thumb image to be visible");
+			return null;
+		}
+	}
+
 	private String getThumbImg(WebElement news) {
 		try {
 			return news.findElement(By.className(THUMB_CLASS)).findElement(By.tagName(IMG_TAG)).getAttribute(SRC_ATTR);
 		} catch (NoSuchElementException e) {
+			log.error(e.getMessage());
 			return null;
 		}
 	}

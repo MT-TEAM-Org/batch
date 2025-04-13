@@ -25,7 +25,7 @@ public class Scheduler {
 	private final Job gameCrawlJob;
 	private final JobLauncher jobLauncher;
 
-	@Scheduled(cron = "0 0 6 * * *") // 매일 오전 6시 0분 0초에 실행
+	@Scheduled(cron = "0 0 5 * * *") // 매일 오전 5시 0분 0초에 실행
 	public void newsCrawlJob() throws
 		JobInstanceAlreadyCompleteException,
 		JobExecutionAlreadyRunningException,

@@ -1,6 +1,11 @@
 package com.playhive.batch.job;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -17,9 +22,11 @@ import com.playhive.batch.crawler.news.NewsCrawler;
 import com.playhive.batch.job.listener.JobLoggerListener;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @RequiredArgsConstructor
+@Slf4j
 public class NewsCrawlJobConfig {
 
 	private static final String NEWS_CRAWL_JOB_NAME = "newsCrawlJob";
@@ -46,8 +53,28 @@ public class NewsCrawlJobConfig {
 	@Bean
 	public Tasklet newsTasklet() {
 		return (contribution, chunkContext) -> {
-			for (NewsCrawler crawler : crawlers) {
-				crawler.crawl();
+			// ExecutorService 생성
+			ExecutorService executorService = Executors.newFixedThreadPool(crawlers.size());
+
+			try {
+				// 크롤러 작업 제출
+				List<Future<Void>> futures = new ArrayList<>();
+				for (NewsCrawler crawler : crawlers) {
+					futures.add(executorService.submit(() -> {
+						crawler.crawl();
+						return null; // 작업의 반환값이 필요 없다면 null 반환
+					}));
+				}
+
+				// 모든 작업이 완료될 때까지 기다림
+				for (Future<Void> future : futures) {
+					future.get(); // 각 스레드의 작업을 기다림
+				}
+			} catch (InterruptedException | ExecutionException e) {
+				// 예외 처리 적절히 수행
+				log.error("Error occurred while executing crawlers: {}", e.getMessage());
+			} finally {
+				executorService.shutdown(); // ExecutorService 종료
 			}
 			return RepeatStatus.FINISHED;
 		};
