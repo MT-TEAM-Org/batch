@@ -17,11 +17,13 @@ import com.playhive.batch.news.dto.NewsSaveRequest;
 import com.playhive.batch.news.entity.NewsCategory;
 import com.playhive.batch.news.service.NewsService;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public abstract class FootballBaseballCrawler {
 
 	private static final String DATE_FIELD = "&date";
 	private static final String EQUALS = "=";
-	private static final String PAGE_FIELD = "&page";
 
 	private static final String NEWS_SECTION_LIST_CLASS = "NewsList_comp_news_list__oXAbN";
 	private static final String NEWS_LIST_CLASS = "NewsItem_news_item__fhEmd";
@@ -29,12 +31,9 @@ public abstract class FootballBaseballCrawler {
 	private static final String TITLE_CLASS = "NewsItem_title__BXkJ6";
 	private static final String THUMB_CLASS = "NewsItem_image_wrap__m-fHo";
 	private static final String PAGE_CLASS = "Pagination_pagination_list__4LIj7";
-	private static final String SOURCE_CLASS = "press";
 	private static final String CONTENT_CLASS = "NewsItem_description__+gwua";
 
 	private static final String UL_TAG = "ul";
-	private static final String LI_TAG = "li";
-	private static final String SPAN_TAG = "span";
 	private static final String IMG_TAG = "img";
 	private static final String SRC_ATTR = "src";
 	private static final String A_TAG = "a";
@@ -124,7 +123,11 @@ public abstract class FootballBaseballCrawler {
 	}
 
 	private void clickPage(int page) {
-		webDriver.findElement(By.className("Pagination_pagination_list__4LIj7"))
-			.findElement(By.xpath(".//button[text()='" + page + "']")).click();
+		try {
+			webDriver.findElement(By.className("Pagination_pagination_list__4LIj7"))
+				.findElement(By.xpath(".//button[text()='" + page + "']")).click();
+		} catch (NoSuchElementException e) {
+			log.error("Could not find pagination page {}", page);
+		}
 	}
 }
