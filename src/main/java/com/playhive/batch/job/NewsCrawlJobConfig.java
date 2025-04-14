@@ -53,28 +53,8 @@ public class NewsCrawlJobConfig {
 	@Bean
 	public Tasklet newsTasklet() {
 		return (contribution, chunkContext) -> {
-			// ExecutorService 생성
-			ExecutorService executorService = Executors.newFixedThreadPool(crawlers.size());
-
-			try {
-				// 크롤러 작업 제출
-				List<Future<Void>> futures = new ArrayList<>();
-				for (NewsCrawler crawler : crawlers) {
-					futures.add(executorService.submit(() -> {
-						crawler.crawl();
-						return null; // 작업의 반환값이 필요 없다면 null 반환
-					}));
-				}
-
-				// 모든 작업이 완료될 때까지 기다림
-				for (Future<Void> future : futures) {
-					future.get(); // 각 스레드의 작업을 기다림
-				}
-			} catch (InterruptedException | ExecutionException e) {
-				// 예외 처리 적절히 수행
-				log.error("Error occurred while executing crawlers: {}", e.getMessage());
-			} finally {
-				executorService.shutdown(); // ExecutorService 종료
+			for (NewsCrawler crawler : crawlers) {
+				crawler.crawl();
 			}
 			return RepeatStatus.FINISHED;
 		};
