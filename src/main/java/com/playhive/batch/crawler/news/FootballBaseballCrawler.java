@@ -177,9 +177,14 @@ public abstract class FootballBaseballCrawler {
 
 	//페이징 개수 가져오기
 	private int getPaginationCount() {
-		WebElement paginationElement = webDriver.findElement(By.className(PAGE_CLASS));
-		List<WebElement> pageLinks = paginationElement.findElements(By.tagName(BUTTON_TAG));
-		return pageLinks.size();
+		try {
+			WebElement paginationElement = webDriver.findElement(By.className(PAGE_CLASS));
+			List<WebElement> pageLinks = paginationElement.findElements(By.tagName(BUTTON_TAG));
+			return pageLinks.size();
+		} catch (Exception e) {
+			log.error("Could not find pagination page {}");
+		}
+		return 1;
 	}
 
 	private void clickPage(int page) {
