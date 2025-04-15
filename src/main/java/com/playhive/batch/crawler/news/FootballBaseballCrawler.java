@@ -186,7 +186,7 @@ public abstract class FootballBaseballCrawler {
 		try {
 			webDriver.findElement(By.className("Pagination_pagination_list__4LIj7"))
 				.findElement(By.xpath(".//button[text()='" + page + "']")).click();
-		} catch (NoSuchElementException e) {
+		} catch (Exception e) {
 			log.error("Could not find pagination page {}", page);
 		}
 	}

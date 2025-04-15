@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class NewsCountService {
 
 	private final NewsCountRepository newsCountRepository;
