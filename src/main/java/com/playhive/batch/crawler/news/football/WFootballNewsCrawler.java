@@ -11,7 +11,6 @@ import com.playhive.batch.news.entity.NewsCategory;
 import com.playhive.batch.news.service.NewsService;
 
 @Component
-@Transactional
 public class WFootballNewsCrawler extends FootballBaseballCrawler implements NewsCrawler {
 
 	private static final String URL = "https://m.sports.naver.com/wfootball/news?sectionId=epl&sort=latest";

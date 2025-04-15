@@ -60,7 +60,9 @@ public abstract class FootballBaseballCrawler {
 		webDriver = WebDriverConfig.createDriver();
 		webDriver.get(url + DATE_FIELD + EQUALS + date.format(FORMATTER));
 
-		IntStream.rangeClosed(1, getPaginationCount()).forEach(value -> {
+		int page = getPaginationCount();
+
+		IntStream.rangeClosed(1, page).forEach(value -> {
 			clickPage(value);
 			saveNews(isYesterday, category);
 		});
@@ -189,7 +191,7 @@ public abstract class FootballBaseballCrawler {
 
 	private void clickPage(int page) {
 		try {
-			webDriver.findElement(By.className("Pagination_pagination_list__4LIj7"))
+			webDriver.findElement(By.className(PAGE_CLASS))
 				.findElement(By.xpath(".//button[text()='" + page + "']")).click();
 		} catch (Exception e) {
 			log.error("Could not find pagination page {}", page);

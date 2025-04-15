@@ -26,7 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
-@Transactional
 public class EsportsNewsCrawler implements NewsCrawler {
 
 	private static final String URL = "https://game.naver.com/esports/League_of_Legends/news/lol";
