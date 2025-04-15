@@ -44,7 +44,7 @@ RUN apt-get update && \
 RUN google-chrome --version
 
 # 애플리케이션이 사용할 포트 노출
-EXPOSE 8081
+EXPOSE 8080
 
 # 애플리케이션 실행 명령
 ENTRYPOINT ["java", "-Duser.timezone=GMT+09:00", "-jar", "app.jar"]

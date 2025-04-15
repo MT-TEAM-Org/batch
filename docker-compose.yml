@@ -7,7 +7,7 @@ services:
       context: . # Dockerfile이 위치한 디렉토리
       dockerfile: Dockerfile # 빌드에 사용할 Dockerfile
     ports:
-      - "8081:8081" # 호스트와 컨테이너의 포트 매핑
+      - "8080:8080" # 호스트와 컨테이너의 포트 매핑
     environment:
       DOCKER_USERNAME: ${DOCKER_USERNAME}
       DOCKER_PASSWORD: ${DOCKER_PASSWORD}
