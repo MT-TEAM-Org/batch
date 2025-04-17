@@ -11,6 +11,7 @@ import com.playhive.batch.news.entity.NewsCategory;
 import com.playhive.batch.news.service.NewsService;
 
 @Component
+@Transactional
 public class BaseballNewsCrawler extends FootballBaseballCrawler implements NewsCrawler {
 
 	private static final String URL = "https://m.sports.naver.com/kbaseball/news?sectionId=kbaseball&sort=latest";
@@ -21,8 +22,6 @@ public class BaseballNewsCrawler extends FootballBaseballCrawler implements News
 
 	@Override
 	public void crawl() {
-		LocalDate currentDate = LocalDate.now();
-		crawlForDate(URL, currentDate.minusDays(1), true, NewsCategory.BASEBALL); // 어제 뉴스 크롤링
-		crawlForDate(URL, currentDate, false, NewsCategory.BASEBALL); // 오늘 뉴스 크롤링
+		crawlForDate(URL, LocalDate.now(), NewsCategory.BASEBALL); // 오늘 뉴스 크롤링
 	}
 }
