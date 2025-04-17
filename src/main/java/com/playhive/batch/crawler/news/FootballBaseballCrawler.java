@@ -56,7 +56,12 @@ public abstract class FootballBaseballCrawler {
 
 	protected void crawlForDate(String url, LocalDate date, NewsCategory category) {
 		webDriver = WebDriverConfig.createDriver();
-		webDriver.get(url + DATE_FIELD + EQUALS + date.format(FORMATTER));
+
+		String webUrl = url + DATE_FIELD + EQUALS + date.format(FORMATTER);
+
+		log.info("CrawlUrl {}", webUrl);
+
+		webDriver.get(webUrl);
 
 		saveNews(category);
 
@@ -119,7 +124,10 @@ public abstract class FootballBaseballCrawler {
 	}
 
 	private List<WebElement> getNewsSectoinList() {
-		WebElement newsSectionListElement = webDriver.findElement(By.className(NEWS_SECTION_LIST_CLASS));
+		WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(120));
+		WebElement newsSectionListElement = wait.until(ExpectedConditions.visibilityOfElementLocated(
+			By.className(NEWS_SECTION_LIST_CLASS)
+		));
 		return newsSectionListElement.findElements(By.tagName(UL_TAG));
 	}
 
