@@ -3,10 +3,8 @@ package com.playhive.batch.crawler.news;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -56,32 +54,29 @@ public abstract class FootballBaseballCrawler {
 		this.newsService = newsService;
 	}
 
-	protected void crawlForDate(String url, LocalDate date, boolean isYesterday, NewsCategory category) {
+	protected void crawlForDate(String url, LocalDate date, NewsCategory category) {
 		webDriver = WebDriverConfig.createDriver();
 		webDriver.get(url + DATE_FIELD + EQUALS + date.format(FORMATTER));
 
-		int page = getPaginationCount();
+		saveNews(category);
 
-		IntStream.rangeClosed(1, page).forEach(value -> {
-			clickPage(value);
-			saveNews(isYesterday, category);
-		});
 		webDriver.quit();
 	}
 
-	private void saveNews(boolean isYesterday, NewsCategory category) {
+	private void saveNews(NewsCategory category) {
+		String recentSource = newsService.findRecentPostDate(category);
 		for (WebElement section : getNewsSectoinList()) {
 			for (WebElement news : getNewsList(section)) {
-				String postDate = getPostDate(news);
-				LocalDateTime newsPostDate = LocalDateTime.parse(postDate, TIME_FORMATTER);
-				// 오전 5시 크롤링이기 때문에 전날 뉴스는 오전 6시이후로만 가져오도록
-				if (isYesterday && newsPostDate.toLocalTime().isBefore(LocalTime.of(5, 0))) {
-					continue;
-				}
-
-				//뉴스 항목 클릭
 				String newsUrl = getSource(news);
 
+				if (newsUrl.equals(recentSource)) { // 중복되는 뉴스면 종료
+					return;
+				}
+
+				String postDate = getPostDate(news);
+				LocalDateTime newsPostDate = LocalDateTime.parse(postDate, TIME_FORMATTER);
+
+				//뉴스 항목 클릭
 				//새청 열기
 				String originalWindow = openDetailTab(newsUrl);
 
@@ -91,7 +86,8 @@ public abstract class FootballBaseballCrawler {
 				// 원래 창으로 돌아가기
 				closeDetailTab(originalWindow);
 
-				saveNews(getTitle(news), thumbImg == null ? getThumbImg(news) : thumbImg, newsUrl, getContent(news), newsPostDate, category);
+				saveNews(getTitle(news), thumbImg == null ? getThumbImg(news) : thumbImg, newsUrl, getContent(news),
+					newsPostDate, category);
 			}
 		}
 	}
@@ -175,26 +171,5 @@ public abstract class FootballBaseballCrawler {
 
 	private String getContent(WebElement news) {
 		return news.findElement(By.className(CONTENT_CLASS)).getText();
-	}
-
-	//페이징 개수 가져오기
-	private int getPaginationCount() {
-		try {
-			WebElement paginationElement = webDriver.findElement(By.className(PAGE_CLASS));
-			List<WebElement> pageLinks = paginationElement.findElements(By.tagName(BUTTON_TAG));
-			return pageLinks.size();
-		} catch (Exception e) {
-			log.error("Could not find pagination page {}");
-		}
-		return 1;
-	}
-
-	private void clickPage(int page) {
-		try {
-			webDriver.findElement(By.className(PAGE_CLASS))
-				.findElement(By.xpath(".//button[text()='" + page + "']")).click();
-		} catch (Exception e) {
-			log.error("Could not find pagination page {}", page);
-		}
 	}
 }
