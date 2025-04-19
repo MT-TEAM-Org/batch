@@ -92,9 +92,10 @@ public class EsportsNewsCrawler implements NewsCrawler {
 		for (WebElement news : getNewsList()) {
 			String postDate = getPostDate(news);
 			String source = getSource(news);
+			String recentSource = newsService.findRecentPostDate(NewsCategory.ESPORTS);
 			//뉴스계시날짜가 없으면 기사가 없는것, 중복되는 기사면 종료
-			if (postDate == null || source.equals(newsService.findRecentPostDate(NewsCategory.ESPORTS))) {
-				break;
+			if (postDate == null || source.equals(recentSource)) {
+				return;
 			}
 			LocalDateTime newsPostDate = parseRelativeTime(postDate);
 			saveNews(getTitle(news), getThumbImg(news, newsPostDate), getSource(news), getContent(news), newsPostDate);
