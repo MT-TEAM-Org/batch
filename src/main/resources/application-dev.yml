@@ -10,6 +10,8 @@ spring:
     url: jdbc:mysql://${DB_ENDPOINT}:3306/${DB_NAME}?useSSL=false&serverTimezone=Asia/Seoul
     username: playhive
     password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 20
 
 
   jpa:
