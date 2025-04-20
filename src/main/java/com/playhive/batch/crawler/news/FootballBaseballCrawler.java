@@ -115,8 +115,8 @@ public abstract class FootballBaseballCrawler {
 	}
 
 	private void closeDetailTab(String originalWindow) {
-		webDriver.close(); // 새 창 닫기
 		try {
+			webDriver.close(); // 새 창 닫기
 			if (webDriver.getWindowHandles().contains(originalWindow)) {
 				webDriver.switchTo().window(originalWindow); // 원래 창으로 전환
 				return;
