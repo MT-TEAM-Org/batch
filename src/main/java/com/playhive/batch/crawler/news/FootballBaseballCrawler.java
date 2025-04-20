@@ -9,6 +9,7 @@ import java.util.List;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.NoSuchSessionException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -115,7 +116,15 @@ public abstract class FootballBaseballCrawler {
 
 	private void closeDetailTab(String originalWindow) {
 		webDriver.close(); // 새 창 닫기
-		webDriver.switchTo().window(originalWindow); // 원래 창으로 전환
+		try {
+			if (webDriver.getWindowHandles().contains(originalWindow)) {
+				webDriver.switchTo().window(originalWindow); // 원래 창으로 전환
+				return;
+			}
+			log.error("원래 창이 존재하지 않습니다.");
+		} catch (NoSuchSessionException | IllegalStateException e) {
+			log.error("세션이 유효하지 않거나 이미 닫혀 있습니다: {}", e.getMessage());
+		}
 	}
 
 	private void saveNews(String title, String thumbImg, String source, String content, LocalDateTime postDate,
