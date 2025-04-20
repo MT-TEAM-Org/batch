@@ -36,6 +36,8 @@ public class WebDriverConfig {
 		options.addArguments("--no-first-run");
 		options.addArguments("--no-service-autorun");
 
+		options.addArguments("--remote-allow-origins=*");
+
 		// Chrome의 적용 가능한 최적화
 		options.setExperimentalOption("prefs", Map.of(
 			"profile.default_content_setting_values.notifications", 2, // 알림 비활성화
