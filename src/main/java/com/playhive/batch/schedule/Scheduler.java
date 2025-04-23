@@ -18,22 +18,50 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 public class Scheduler {
-
-	private final Job sampleJob;
+	private final Job newsCrawlJob;
+	private final Job matchCrawlJob;
+	private final Job gameCrawlJob;
 	private final JobLauncher jobLauncher;
 
-	@Scheduled(cron = "*/5 * * * * *") // 매 5초마다 실행
-	public void sampleJob() throws
+	@Scheduled(cron = "0 0 */2 * * *") // 매일 2시간 마다 실행
+	public void newsCrawlJob() throws
 		JobInstanceAlreadyCompleteException,
 		JobExecutionAlreadyRunningException,
 		JobParametersInvalidException,
 		JobRestartException {
 
 		JobParameters jobParameters = new JobParametersBuilder()
-			.addDate("date", new Date()) // 현재 날짜 및 시간을 파라미터로 추가
-			.addLong("time", System.currentTimeMillis()) // 고유한 Long 파라미터 추가
+			.addDate("date", new Date())
+			.addLong("time", System.currentTimeMillis())
 			.toJobParameters();
 
-		this.jobLauncher.run(sampleJob, jobParameters);
+		this.jobLauncher.run(newsCrawlJob, jobParameters);
+	}
+
+	@Scheduled(cron = "0 0 7 * * *") // 매일 오전 7시 0분 0초에 실행
+	public void matchCrawlJob() throws
+		JobInstanceAlreadyCompleteException,
+		JobExecutionAlreadyRunningException,
+		JobParametersInvalidException,
+		JobRestartException {
+
+		JobParameters jobParameters = new JobParametersBuilder()
+			.addDate("date", new Date())
+			.addLong("time", System.currentTimeMillis())
+			.toJobParameters();
+
+		this.jobLauncher.run(matchCrawlJob, jobParameters);
+	}
+
+	@Scheduled(cron = "0 0 23 * * *") // 매일 오후 11에 다음날에 노출될 게임 정보 크롤링 실행
+	public void gameEventCrawl() throws JobInstanceAlreadyCompleteException,
+		JobExecutionAlreadyRunningException,
+		JobParametersInvalidException, JobRestartException {
+		JobParameters jobParameters = new JobParametersBuilder()
+			.addDate("date", new Date())
+			.addLong("time", System.currentTimeMillis())
+			.toJobParameters();
+
+		this.jobLauncher.run(gameCrawlJob, jobParameters);
 	}
 }
