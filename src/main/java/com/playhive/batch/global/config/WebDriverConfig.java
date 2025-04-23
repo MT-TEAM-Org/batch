@@ -37,11 +37,14 @@ public class WebDriverConfig {
 		options.addArguments("--no-service-autorun");
 
 		options.addArguments("--remote-allow-origins=*");
+		// 시크릿 모드 설정
+		options.addArguments("--incognito");
 
 		// Chrome의 적용 가능한 최적화
 		options.setExperimentalOption("prefs", Map.of(
 			"profile.default_content_setting_values.notifications", 2, // 알림 비활성화
-			"profile.default_content_setting_values.images", 2 // 이미지 로딩 비활성화
+			"profile.default_content_setting_values.images", 2, // 이미지 로딩 비활성화
+			"profile.history.disabled", true
 		));
 
 		return new ChromeDriver(options);
