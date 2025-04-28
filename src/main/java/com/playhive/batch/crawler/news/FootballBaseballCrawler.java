@@ -53,7 +53,6 @@ public abstract class FootballBaseballCrawler {
     }
 
     protected void crawlForDate(String url, LocalDate date, NewsCategory category) {
-        WebDriver webDriver = null;
         try {
             webDriver = WebDriverConfig.createDriver();
 

@@ -55,7 +55,6 @@ public class WclMatchCrawler implements MatchCrawler {
     }
 
     private void crawlMatch(LocalDateTime recentDate) {
-        WebDriver webDriver = null;
         try {
             webDriver = WebDriverConfig.createDriver();
             for (String date : getCrawlDate(recentDate)) {

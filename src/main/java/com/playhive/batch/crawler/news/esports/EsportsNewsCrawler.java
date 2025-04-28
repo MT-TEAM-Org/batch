@@ -60,7 +60,6 @@ public class EsportsNewsCrawler implements NewsCrawler {
 
     @Override
     public void crawl() {
-        WebDriver webDriver = null;
         try {
             webDriver = WebDriverConfig.createDriver();
             LocalDate currentDate = LocalDate.now();
