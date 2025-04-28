@@ -67,8 +67,10 @@ public class EplMatchCrawler implements MatchCrawler {
                     saveMatch(date);
                 } catch (TimeoutException e) {
                     log.error("페이지를 찾을 수 없습니다. 날짜: {}", date, e);
+                    continue;
                 } catch (RuntimeException e) {
                     log.error("크롤링 중 에러 발생: {}", e.getMessage(), e);
+                    continue;
                 }
             }
         } finally {
