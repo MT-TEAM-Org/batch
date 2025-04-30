@@ -152,8 +152,8 @@ public class LckMatchCrawler implements MatchCrawler {
                 place,
                 leagueName,
                 MatchCategory.ESPORTS,
-                LocalDateTime.parse(startDate, TIME_FORMATTER).plusHours(9),
-                LocalDateTime.parse(startDate, TIME_FORMATTER).plusHours(9).plusMinutes(160)));
+                LocalDateTime.parse(startDate, TIME_FORMATTER),
+                LocalDateTime.parse(startDate, TIME_FORMATTER).plusMinutes(160)));
     }
 
     private String getMatchDate(WebElement date) {
