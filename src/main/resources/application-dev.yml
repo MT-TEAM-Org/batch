@@ -3,8 +3,8 @@ spring:
     job:
       name: footballCalendarJob
       enabled: false
-  #    jdbc:
-  #      initialize-schema: never
+      jdbc:
+        initialize-schema: always
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://${DB_ENDPOINT}:3306/${DB_NAME}?useSSL=false&serverTimezone=Asia/Seoul
