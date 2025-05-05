@@ -38,7 +38,7 @@ jobs:
           username: ${{ secrets.AWS_PROD_USERNAME }}
           key: ${{ secrets.SSH_PROD_PRIVATE_KEY }}
           source: ./docker-compose.yml
-          target: ~/play-hive-batch-prod/
+          target: ~/play-hive-batch/
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
