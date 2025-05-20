@@ -47,3 +47,16 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+tasks.processResources {
+    // 환경 변수를 가져와서 replace
+    filesMatching('application.yml') {
+        // build.gradle에 설정된 환경변수들을 주입
+        expand(
+                DB_ENDPOINT: System.getenv('DB_ENDPOINT'),
+                DB_NAME: System.getenv('DB_NAME'),
+                DB_PASSWORD: System.getenv('DB_PASSWORD')
+        )
+    }
+}
+

@@ -1,133 +1,78 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-# This workflow will build a package using Gradle and then publish it to GitHub packages when a release is created
-# For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#Publishing-using-gradle
-
-name: Deploy Play Hive Batch to AWS
+name: 🚀 배포
 
 on:
+  pull_request:
+    types: [ closed ]
+    branches: [ "dev" ]
   push:
-    branches:
-      - dev
+    branches: [ "dev" ]
 
 jobs:
-  build-and-push:
+  deploy:
     runs-on: ubuntu-latest
-
+    env:
+      DB_ENDPOINT: ${{ secrets.DEV_DB_ENDPOINT }}
+      DB_NAME: ${{ secrets.DEV_DB_NAME }}
+      DB_PASSWORD: ${{ secrets.DEV_DB_PASSWORD }}
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          ref: dev  # 명확하게 dev 브랜치 지정
+        uses: actions/checkout@v3
 
-      - name: Set up JDK 17
+      - name: 🔨 JDK 17 세팅
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
           java-version: '17'
+          distribution: 'temurin'
 
-      - name: List Files in Current Directory
-        run: ls -la
+      - name: 🔨 gradlew 실행 권한 설정
+        run: chmod +x gradlew
 
-      - name: Copy docker-compose.yml to EC2
-        uses: appleboy/scp-action@v0.1.4
+      - name: 🔨 Gradle 캐시 설정
+        uses: actions/cache@v3
         with:
-          host: ${{ secrets.AWS_SERVER_IP }}
-          username: ${{ secrets.AWS_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: ./docker-compose.yml
-          target: ~/play-hive-batch/
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
+      - name: 🔨 Gradle 빌드
+        run: ./gradlew build --parallel
 
-      - name: Build Docker Image
+      - name: 📦 jar, appspec, 배포 스크립트 복사
         run: |
-          docker build --no-cache -t ${{ secrets.DOCKER_USERNAME }}/play-hive-batch:latest .
+          mkdir -p before-deploy
+          cp ./build/libs/*.jar ./before-deploy/
+          cp ./appspec.yml ./before-deploy/
+          cp -r ./scripts/dev/ ./before-deploy/scripts/
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
+      - name: 🗜️ 배포 패키지 생성
+        run: zip -r -qq ./deploy.zip ./before-deploy/
+
+      - name: 🔑 SSH 키 설정
+        uses: webfactory/ssh-agent@v0.7.0
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Push Docker Image to Docker Hub
+      - name: 🔑 Ubuntu 호스트 추가
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/play-hive-batch:latest
+          ssh-keyscan -H ${{ secrets.AWS_SERVER_IP }} >> ~/.ssh/known_hosts
 
-  deploy:
-    needs: build-and-push
-    runs-on: ubuntu-latest
+      - name: 🚀 서버에 파일 업로드
+        run: |
+          scp ./deploy.zip ubuntu@${{ secrets.AWS_SERVER_IP }}:/home/ubuntu/deploy.zip
+          ssh ubuntu@${{ secrets.AWS_SERVER_IP }} "
+            unzip -o /home/ubuntu/deploy.zip -d /home/ubuntu &&
+            rm -rf /home/ubuntu/app/* &&
+            mv /home/ubuntu/before-deploy/* /home/ubuntu/app/ &&
+            chmod +x /home/ubuntu/app/scripts/*.sh"
 
-    steps:
-      - name: Install Java on AWS
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.AWS_SERVER_IP }}
-          username: ${{ secrets.AWS_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            echo "Checking if Java is installed..."
-            if ! java -version &> /dev/null; then
-              echo "Java not found. Installing OpenJDK 17..."
-              sudo apt update
-              sudo apt install -y openjdk-17-jdk
-            else
-              echo "Java is already installed."
-            fi
+      - name: 🎯 Ubuntu 서버에서 배포 실행
+        run: |
+          ssh ubuntu@${{ secrets.AWS_SERVER_IP }} "/home/ubuntu/app/scripts/run_new_was.sh"
 
-      - name: Deploy to AWS and Restart Services with Docker Compose
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.AWS_SERVER_IP }}
-          username: ${{ secrets.AWS_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            # 이동할 디렉토리 설정
-            DEPLOY_DIR=~/play-hive-batch
-
-            echo "Navigating to deployment directory: $DEPLOY_DIR"
-            cd $DEPLOY_DIR || exit
-
-            # 최신 Docker 및 Docker Compose 설치 확인
-            echo "Ensuring Docker and Docker Compose are installed..."
-            
-            # Docker 설치 여부 확인
-            if ! docker --version &>/dev/null; then
-              echo "Docker is not installed. Installing Docker..."
-              sudo apt-get update
-              sudo apt-get install -y docker.io
-              sudo systemctl start docker
-              sudo systemctl enable docker
-            else
-              echo "Docker is already installed."
-            fi
-            
-            # Docker Compose 설치 여부 확인
-            if ! docker-compose --version &>/dev/null; then
-              echo "Docker Compose is not installed. Installing Docker Compose..."
-              sudo apt-get update
-              sudo apt-get install -y docker-compose
-            else
-              echo "Docker Compose is already installed."
-            fi
-
-            # 기존 컨테이너 중지 및 제거
-            echo "Stopping and removing existing containers..."
-            sudo docker-compose down || true
-            
-            # 최신 이미지를 가져오기
-            echo "Pulling the latest Docker image..."
-            sudo docker-compose pull
-            
-            # 컨테이너 재실행
-            echo "Starting containers with Docker Compose..."
-            sudo docker-compose up -d
-            
-            # 사용하지 않는 이미지 제거
-            echo "Removing unused Docker images..."
-            sudo docker image prune -f
-            
-            echo "Deployment completed successfully!"
+      - name: 🧹 임시 파일 정리
+        run: |
+          ssh ubuntu@${{ secrets.AWS_SERVER_IP }} "
+            rm -rf /home/ubuntu/deploy.zip /home/ubuntu/before-deploy"
