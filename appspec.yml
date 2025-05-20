@@ -1,0 +1,29 @@
+version: 0.0
+os: linux
+
+files:
+  - source: /
+    destination: /home/ubuntu/app
+    overwrite: yes
+
+permissions:
+  - object: /home/ubuntu
+    pattern: "**"
+    owner: ubuntu
+    group: ubuntu
+
+hooks:
+  AfterInstall:
+    - location: scripts/run_new_was.sh
+      timeout: 60
+      runas: ec2-user
+
+  ApplicationStart:
+    - location: scripts/health.sh
+      timeout: 60
+      runas: ec2-user
+
+  ValidateService:
+    - location: scripts/switch.sh
+      timeout: 60
+      runas: ec2-user
