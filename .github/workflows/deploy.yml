@@ -61,7 +61,7 @@ jobs:
 
       - name: 🚀 서버에 파일 업로드
         run: |
-          scp ./deploy.zip ubuntu@${{ secrets.AWS_SERVER_IP }}:/home/ubuntu/deploy.zip
+          scp -C ./deploy.zip ubuntu@${{ secrets.AWS_SERVER_IP }}:/home/ubuntu/deploy.zip
           ssh ubuntu@${{ secrets.AWS_SERVER_IP }} "
             unzip -o /home/ubuntu/deploy.zip -d /home/ubuntu &&
             rm -rf /home/ubuntu/app/* &&
