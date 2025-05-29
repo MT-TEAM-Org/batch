@@ -47,4 +47,4 @@ RUN google-chrome --version
 EXPOSE 8080
 
 # 애플리케이션 실행 명령
-ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -Duser.timezone=GMT+09:00 -jar app.jar"]
+ENTRYPOINT sh -c 'exec java $JAVA_OPTS -Duser.timezone=GMT+09:00 -jar app.jar'
