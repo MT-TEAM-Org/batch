@@ -47,39 +47,33 @@ jobs:
       - name: 🔨 Gradle 빌드
         run: ./gradlew build --parallel
 
-      - name: 📦 jar, appspec, 배포 스크립트 복사
+      - name: 📦 배포 파일 준비
         run: |
           mkdir -p before-deploy
           cp ./build/libs/*.jar ./before-deploy/
           cp ./appspec.yml ./before-deploy/
           cp -r ./scripts/dev/ ./before-deploy/scripts/
+          zip -r deploy.zip before-deploy/
 
-      - name: 🗜️ 배포 패키지 생성
-        run: zip -r -qq ./deploy.zip ./before-deploy/
-
-      - name: 🔑 SSH 키 설정
-        uses: webfactory/ssh-agent@v0.7.0
+      - name: 📤 EC2에 파일 업로드
+        uses: appleboy/scp-action@v0.1.5
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.AWS_SERVER_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "deploy.zip"
+          target: "/home/ubuntu"
 
-      - name: 🔑 Ubuntu 호스트 추가
-        run: |
-          ssh-keyscan -H ${{ secrets.AWS_SERVER_IP }} >> ~/.ssh/known_hosts
-
-      - name: 🚀 서버에 파일 업로드
-        run: |
-          scp -C ./deploy.zip ubuntu@${{ secrets.AWS_SERVER_IP }}:/home/ubuntu/deploy.zip
-          ssh ubuntu@${{ secrets.AWS_SERVER_IP }} "
-            unzip -o /home/ubuntu/deploy.zip -d /home/ubuntu &&
-            rm -rf /home/ubuntu/app/* &&
-            mv /home/ubuntu/before-deploy/* /home/ubuntu/app/ &&
-            chmod +x /home/ubuntu/app/scripts/*.sh"
-
-      - name: 🎯 Ubuntu 서버에서 배포 실행
-        run: |
-          ssh ubuntu@${{ secrets.AWS_SERVER_IP }} "/home/ubuntu/app/scripts/run_new_was.sh"
-
-      - name: 🧹 임시 파일 정리
-        run: |
-          ssh ubuntu@${{ secrets.AWS_SERVER_IP }} "
-            rm -rf /home/ubuntu/deploy.zip /home/ubuntu/before-deploy"
+      - name: 🚀 EC2에서 배포 스크립트 실행
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.AWS_SERVER_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            unzip -o /home/ubuntu/deploy.zip -d /home/ubuntu
+            rm -rf /home/ubuntu/app/*
+            mv /home/ubuntu/before-deploy/* /home/ubuntu/app/
+            chmod +x /home/ubuntu/app/scripts/*.sh
+            /home/ubuntu/app/scripts/run_new_was.sh
+            rm -rf /home/ubuntu/deploy.zip /home/ubuntu/before-deploy
