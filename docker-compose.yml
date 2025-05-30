@@ -16,6 +16,11 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL}
       TZ: ${TZ}
+      JAVA_OPTS: >
+        -Xms512m
+        -Xmx1024m
+        -XX:+HeapDumpOnOutOfMemoryError
+        -XX:HeapDumpPath=/app/heap_dump.hprof
     restart: always
 
   #  zookeeper:

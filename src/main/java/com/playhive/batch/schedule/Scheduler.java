@@ -1,6 +1,9 @@
 package com.playhive.batch.schedule;
 
 import com.playhive.batch.crawler.game.GameCrawler;
+import com.playhive.batch.crawler.news.baseball.BaseballNewsCrawler;
+import com.playhive.batch.crawler.news.football.KFootballNewsCrawler;
+import com.playhive.batch.crawler.news.football.WFootballNewsCrawler;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
@@ -22,6 +25,10 @@ public class Scheduler {
     //    private final Job gameCrawlJob;
     private final GameCrawler gameCrawler;
     private final JobLauncher jobLauncher;
+
+//    private final BaseballNewsCrawler baseballNewsCrawler;
+//    private final WFootballNewsCrawler wFootballNewsCrawler;
+//    private final KFootballNewsCrawler kFootballNewsCrawler;
 
     @Scheduled(cron = "0 0 */2 * * *") // 매일 2시간 마다 실행
     public void newsCrawlJob() throws
@@ -73,4 +80,11 @@ public class Scheduler {
     public void gameEventCrawl() {
         gameCrawler.crawl();
     }
+
+//    @Scheduled(cron = "0 * * * * *") // 뉴스 테스트용 스케줄러 (제거 예정)
+//    public void testBaseballCrawl() {
+//        baseballNewsCrawler.crawl();
+//        kFootballNewsCrawler.crawl();
+//        wFootballNewsCrawler.crawl();
+//    }
 }
