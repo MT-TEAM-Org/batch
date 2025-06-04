@@ -10,7 +10,7 @@ public class WebDriverConfig {
     public static WebDriver createDriver() {
         ChromeOptions options = new ChromeOptions();
         // 헤드리스 모드 설정: 브라우저 UI 없이 실행
-        options.addArguments("--headless=new");
+        options.addArguments("--headless");
         // 리소스 절약을 위한 GPU 가속 비활성화
         options.addArguments("--disable-gpu");
         // Linux 환경에서 Chrome을 사용할 때 발생할 수 있는 문제 우회
