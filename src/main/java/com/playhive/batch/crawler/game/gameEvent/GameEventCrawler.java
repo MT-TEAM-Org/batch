@@ -48,7 +48,7 @@ public class GameEventCrawler implements GameCrawler {
     private void crawlGameEvent() {
         try {
             // HTML 문서 요청 및 파싱
-            Document document = Jsoup.connect(URL).get();
+            Document document = Jsoup.connect(URL).timeout(60_000).get();
             saveEvent(document);
         } catch (Exception e) {
             log.error("Error occurred while crawling events: {}", e.getMessage(), e);
