@@ -9,6 +9,9 @@ public class WebDriverConfig {
 
     public static WebDriver createDriver() {
         ChromeOptions options = new ChromeOptions();
+
+        options.setBinary("/usr/bin/google-chrome"); // 위치 명시
+
         // 헤드리스 모드 설정: 브라우저 UI 없이 실행
         options.addArguments("--headless");
         // 리소스 절약을 위한 GPU 가속 비활성화
