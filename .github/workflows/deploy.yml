@@ -73,30 +73,36 @@ jobs:
             unzip -o /home/ubuntu/deploy.zip -d /home/ubuntu
             rm -rf /home/ubuntu/app/*
             mv /home/ubuntu/before-deploy/* /home/ubuntu/app/
-
+            
             echo "🛑 기존 WAS 종료 시도"
             PID=$(pgrep -f 'java.*.jar')
             if [ -n "$PID" ]; then
               kill -15 "$PID"
-                sleep 5
+              sleep 5
             fi
-
+            
             echo "🚀 새 WAS 실행"
             nohup java -jar /home/ubuntu/app/*.jar > /home/ubuntu/app/nohup.out 2>&1 &
-
+            
             echo "🩺 Health Check 시작..."
-            for i in {1..5}
+            for i in {1..10}
             do
               HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/health-check)
               if [ "$HTTP_STATUS" -eq 200 ]; then
                 echo "✅ Health Check 성공 (200 OK)"
-                exit 0
+                HEALTH_OK=true
+                break
               fi
-              echo "⏳ 서버 준비 대기 중... 재시도 ($i/5)"
+              echo "⏳ 서버 준비 대기 중... 재시도 ($i/10)"
               sleep 10
             done
-
-            echo "❌ Health Check 실패"
-            exit 1
             
+            if [ "$HEALTH_OK" != true ]; then
+              echo "❌ Health Check 실패"
+              exit 1
+            fi
+            
+            echo "🧹 배포 파일 정리"
             rm -rf /home/ubuntu/deploy.zip /home/ubuntu/before-deploy
+            
+            exit 0
