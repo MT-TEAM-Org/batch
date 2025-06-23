@@ -5,6 +5,7 @@ import com.playhive.batch.global.config.WebDriverConfig;
 import com.playhive.batch.news.dto.NewsSaveRequest;
 import com.playhive.batch.news.entity.NewsCategory;
 import com.playhive.batch.news.service.NewsService;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -18,6 +19,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 @Slf4j
 public class TestCrawler {
@@ -53,7 +56,9 @@ public class TestCrawler {
             driver.get(webUrl);
 
             // 페이지 로딩 대기
-            Thread.sleep(3000);
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            wait.until(ExpectedConditions.presenceOfElementLocated(
+                    By.cssSelector("li.NewsItem_news_item__fhEmd")));  // 기사 리스트가 로딩됐는지
 
             scrollAndExtractUntilSaved(driver, category);
 
