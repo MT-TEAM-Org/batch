@@ -42,6 +42,10 @@ dependencies {
     implementation group: 'com.mysql', name: 'mysql-connector-j', version: '8.3.0'
 
     implementation group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '4.31.0'
+
+    // ElasticSearch
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+    implementation 'jakarta.json:jakarta.json-api:2.1.1'
 }
 
 tasks.named('test') {

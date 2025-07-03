@@ -15,7 +15,6 @@ spring:
     hikari:
       maximum-pool-size: 20
 
-
   jpa:
     show-sql: false
     properties:
@@ -31,6 +30,9 @@ spring:
       #  validate Entity 와 테이블이 정상 매핑 되었는지 확인
       #  none 기존테이블을 더 이상 건드리지 않음.
     open-in-view: true
+
+  elasticsearch:
+    uris: http://{es-server-ip}:9200
 
 logging:
   level:
