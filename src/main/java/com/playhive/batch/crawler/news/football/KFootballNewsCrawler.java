@@ -1,7 +1,7 @@
 package com.playhive.batch.crawler.news.football;
 
+import com.playhive.batch.crawler.news.FootballBaseballNewsCrawler;
 import com.playhive.batch.crawler.news.NewsCrawler;
-import com.playhive.batch.crawler.news.TestCrawler;
 import com.playhive.batch.news.entity.NewsCategory;
 import com.playhive.batch.news.service.NewsService;
 import java.time.LocalDate;
@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Transactional
-public class KFootballNewsCrawler extends TestCrawler implements NewsCrawler {
+public class KFootballNewsCrawler extends FootballBaseballNewsCrawler implements NewsCrawler {
 
     private static final String URL = "https://m.sports.naver.com/kfootball/news?sectionId=kfootball&sort=latest";
 

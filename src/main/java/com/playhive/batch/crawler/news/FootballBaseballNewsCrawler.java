@@ -23,7 +23,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 @Slf4j
-public class TestCrawler {
+public class FootballBaseballNewsCrawler {
 
     private static final String DATE_FIELD = "&date=";
 
@@ -39,7 +39,7 @@ public class TestCrawler {
 
     private final NewsService newsService;
 
-    public TestCrawler(NewsService newsService) {
+    public FootballBaseballNewsCrawler(NewsService newsService) {
         this.newsService = newsService;
     }
 
@@ -274,19 +274,21 @@ public class TestCrawler {
      */
     private String getThumbImage(WebElement item) {
         try {
-            WebElement img = item.findElement(By.className(THUMB_CLASS))
-                    .findElement(By.tagName("img"));
-            return img.getAttribute("src");
-        } catch (Exception e) {
-            // 다른 방법으로 이미지 찾기
-            try {
-                WebElement img = item.findElement(By.cssSelector("img"));
-                return img.getAttribute("src");
-            } catch (Exception e2) {
-                return null;
+            WebElement img = item.findElement(By.cssSelector("img"));
+            String src = img.getAttribute("src");
+
+            if (src == null || src.isBlank() || src.startsWith("data:")) {
+                src = img.getAttribute("data-src");
             }
+
+            return (src != null && !src.isBlank()) ? src : null;
+
+        } catch (Exception e) {
+            // img 태그 자체가 없거나 접근 실패 → 그냥 null 리턴
+            return null;
         }
     }
+
 
     /**
      * 스크롤 수행
