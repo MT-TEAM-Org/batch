@@ -20,6 +20,6 @@ public class KFootballNewsCrawler extends FootballBaseballNewsCrawler implements
 
     @Override
     public void crawl() {
-        crawlForDate("KFOOTBALL", URL, LocalDate.now(), NewsCategory.FOOTBALL); // 오늘 뉴스 크롤링
+        crawlForDate(URL, LocalDate.now(), NewsCategory.FOOTBALL); // 오늘 뉴스 크롤링
     }
 }
