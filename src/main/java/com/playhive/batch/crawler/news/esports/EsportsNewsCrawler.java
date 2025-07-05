@@ -111,7 +111,7 @@ public class EsportsNewsCrawler implements NewsCrawler {
             String title = getTitle(news);
             String content = getContent(news);
             String thumb = extractImage(news);
-            
+
             if (thumb == null || thumb.isBlank()) {
                 log.debug("🔍 썸네일 없음, 기본값 또는 상세 진입 고려: {}", source);
             }
@@ -123,7 +123,7 @@ public class EsportsNewsCrawler implements NewsCrawler {
 
             log.debug("✅ 기사 수집됨: [{}] {} ({})", postDate, title, source);
             newsList.add(NewsSaveRequest.createRequest(
-                    title, null, source, content, postDate, NewsCategory.ESPORTS
+                    title, thumb, source, content, postDate, NewsCategory.ESPORTS
             ));
         }
 
