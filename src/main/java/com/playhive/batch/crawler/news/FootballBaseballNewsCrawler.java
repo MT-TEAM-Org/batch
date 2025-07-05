@@ -98,6 +98,10 @@ public class FootballBaseballNewsCrawler {
                     continue;
                 }
 
+                if (newsService.existsByUrl(url)) {
+                    continue; // 이미 DB에 존재하면 skip
+                }
+
                 String title = getText(item, By.className(TITLE_CLASS));
                 String content = getText(item, By.className(CONTENT_CLASS));
                 String thumb = extractImage(item);
