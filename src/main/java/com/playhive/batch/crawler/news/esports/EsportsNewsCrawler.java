@@ -110,6 +110,11 @@ public class EsportsNewsCrawler implements NewsCrawler {
             LocalDateTime postDate = parseRelativeTime(postDateStr);
             String title = getTitle(news);
             String content = getContent(news);
+            String thumb = extractImage(news);
+            
+            if (thumb == null || thumb.isBlank()) {
+                log.debug("🔍 썸네일 없음, 기본값 또는 상세 진입 고려: {}", source);
+            }
 
             if (title.isBlank()) {
                 log.debug("⛔ 무시됨 - 제목 없음: {}", source);
@@ -182,6 +187,20 @@ public class EsportsNewsCrawler implements NewsCrawler {
         } catch (DateTimeParseException e) {
             return LocalDateTime.now();
         }
+    }
+
+    private String extractImage(WebElement news) {
+        try {
+            WebElement thumbnailDiv = news.findElement(By.className("news_card_thumbnail__3thTg"));
+            String style = thumbnailDiv.getAttribute("style"); // style="background-image: url(...)"
+            Matcher matcher = Pattern.compile("url\\([\"']?(.*?)[\"']?\\)").matcher(style);
+            if (matcher.find()) {
+                return matcher.group(1);
+            }
+        } catch (NoSuchElementException e) {
+            log.debug("❌ 썸네일 div 없음");
+        }
+        return null;
     }
 
     private void save(List<NewsSaveRequest> newsList) {
