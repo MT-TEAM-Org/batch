@@ -5,6 +5,7 @@ import com.playhive.batch.global.config.WebDriverConfig;
 import com.playhive.batch.news.dto.NewsSaveRequest;
 import com.playhive.batch.news.entity.NewsCategory;
 import com.playhive.batch.news.service.NewsService;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -17,6 +18,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -113,7 +117,14 @@ public class EsportsNewsCrawler implements NewsCrawler {
             String thumb = extractImage(news);
 
             if (thumb == null || thumb.isBlank()) {
-                log.debug("🔍 썸네일 없음, 기본값 또는 상세 진입 고려: {}", source);
+                log.debug("🔍 썸네일 없음 → 상세 페이지 진입 시도: {}", source);
+                thumb = fetchDetailThumbByJsoup(source);
+
+                if (thumb == null || thumb.isBlank()) {
+                    log.warn("❌ 상세 페이지에서도 썸네일 추출 실패: {}", source);
+                } else {
+                    log.debug("✅ 상세 페이지에서 썸네일 추출 성공: {}", thumb);
+                }
             }
 
             if (title.isBlank()) {
@@ -129,6 +140,24 @@ public class EsportsNewsCrawler implements NewsCrawler {
 
         log.info("총 {}건의 뉴스 저장 시도 중...", newsList.size());
         save(newsList);
+    }
+
+    private String fetchDetailThumbByJsoup(String url) {
+        try {
+            Document doc = Jsoup.connect(url)
+                    .userAgent("Mozilla")
+                    .timeout(5000)
+                    .get();
+
+            Element imgInArticle = doc.selectFirst(".ArticleImage_image_wrap__cm1wZ img");
+            if (imgInArticle != null) {
+                return imgInArticle.absUrl("src");
+            }
+
+        } catch (IOException e) {
+            log.warn("Jsoup 상세 썸네일 파싱 실패: {}", url, e);
+        }
+        return null;
     }
 
     private void clickLoadNews() {
