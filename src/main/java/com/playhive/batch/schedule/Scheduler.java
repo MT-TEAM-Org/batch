@@ -36,7 +36,7 @@ public class Scheduler {
         this.jobLauncher.run(newsCrawlJob, jobParameters);
     }
 
-    @Scheduled(cron = "0 0 7 * * *") // 매일 오전 7시 0분 0초에 실행
+    @Scheduled(cron = "0 0 7,15 * * *") // 매일 오전 7시, 15 실행
     public void matchCrawlJob() throws
             JobInstanceAlreadyCompleteException,
             JobExecutionAlreadyRunningException,
