@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class KboMatchCrawler implements MatchCrawler {
 
-    private static final String URL = "https://m.sports.naver.com/kbaseball/schedule/index?date=";
+    private static final String URL = "https://m.sports.naver.com/kbaseball/schedule/index?category=kbo&date=";
 
     private static final String LEAGUE_CLASS = "ScheduleAllType_match_list_group__1nFDy";
     private static final String LEAGUE_NAME = "ScheduleAllType_title___Qfd4";
