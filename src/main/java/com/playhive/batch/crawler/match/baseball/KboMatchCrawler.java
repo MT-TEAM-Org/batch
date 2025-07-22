@@ -1,178 +1,84 @@
 package com.playhive.batch.crawler.match.baseball;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.playhive.batch.crawler.match.MatchCrawler;
-import com.playhive.batch.global.config.WebDriverConfig;
-import com.playhive.batch.match.match.domain.LeagueName;
 import com.playhive.batch.match.match.domain.MatchCategory;
 import com.playhive.batch.match.match.dto.service.request.MatchServiceRequest;
 import com.playhive.batch.match.match.service.MatchService;
-import java.time.Duration;
+import com.playhive.batch.match.team.domain.TeamCategory;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
 public class KboMatchCrawler implements MatchCrawler {
 
-    private static final String URL = "https://m.sports.naver.com/kbaseball/schedule/index?category=kbo&date=";
+    private static final String API_URL_TEMPLATE =
+            "https://api-gw.sports.naver.com/schedule/games?fields=basic,schedule,baseball" +
+                    "&upperCategoryId=kbaseball&categoryId=kbo&fromDate=%s&toDate=%s";
 
-    private static final String LEAGUE_CLASS = "ScheduleAllType_match_list_group__1nFDy";
-    private static final String LEAGUE_NAME = "ScheduleAllType_title___Qfd4";
-    private static final String MATCH_CLASS = "MatchBox_match_item__3_D0Q";
-    private static final String MATCH_TIME_CLASS = "MatchBox_time__nIEfd";
-    private static final String MATCH_PLACE = "MatchBox_stadium__13gft";
-    private static final String TEAM_NAME_CLASS = "MatchBoxHeadToHeadArea_team__40JQL";
-    private static final String TEAM_LOGO_CLASS = "MatchBoxHeadToHeadArea_emblem__15NcN";
-
-    private static final String IMG_TAG = "img";
-    private static final String SRC_ATTR = "src";
-
-    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-    private static final String KBO_NAME = "KBO리그";
-    private static final String BLANK = " ";
-
+    private final RestTemplate restTemplate = new RestTemplate();
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private final MatchService matchService;
-    private WebDriver webDriver;
 
     @Override
-    public void crawl(LocalDateTime recentDate) {
-        crawlMatch(recentDate);
-    }
+    public void crawl(LocalDateTime recentTime) {
 
-    private void crawlMatch(LocalDateTime recentDate) {
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        String from = LocalDateTime.now().format(dateFormatter);
+        String to = LocalDateTime.now().plusDays(7).format(dateFormatter);
+        String requestUrl = String.format(API_URL_TEMPLATE, from, to);
+
+        log.info("KBO API 호출: {}", requestUrl);
+
+        ResponseEntity<String> response = restTemplate.getForEntity(requestUrl, String.class);
+
         try {
-            webDriver = WebDriverConfig.createDriver();
-            for (String date : getCrawlDate(recentDate)) {
-                try {
-                    webDriver.get(URL + date);
-                    WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(10));
-                    wait.until(ExpectedConditions.visibilityOfElementLocated(By.className(LEAGUE_CLASS)));
-                    saveMatch(date);
-                } catch (TimeoutException e) {
-                    log.error("페이지를 찾을 수 없습니다. 날짜: {}", date, e);
-                    continue;
-                } catch (RuntimeException e) {
-                    log.error("크롤링 중 에러 발생: {}", e.getMessage(), e);
+            JsonNode root = objectMapper.readTree(response.getBody());
+            JsonNode games = root.path("result").path("games");
+
+            if (!games.isArray()) {
+                log.warn("games 데이터가 배열이 아닙니다.");
+                return;
+            }
+
+            for (JsonNode game : games) {
+
+                String homeTeamName = game.path("homeTeamName").asText();
+                String awayTeamName = game.path("awayTeamName").asText();
+                LocalDateTime gameDateTime = LocalDateTime.parse(game.path("gameDateTime").asText(),
+                        DateTimeFormatter.ISO_DATE_TIME);
+
+                if (matchService.exists(TeamCategory.BASEBALL, homeTeamName, awayTeamName, gameDateTime)) {
+                    log.info("[중복] 저장 생략: {} vs {} date : {}", homeTeamName, awayTeamName, gameDateTime);
                     continue;
                 }
+
+                matchService.save(MatchServiceRequest.createRequest(
+                        homeTeamName,
+                        game.path("homeTeamEmblemUrl").asText(),
+                        awayTeamName,
+                        game.path("awayTeamEmblemUrl").asText(),
+                        game.path("stadium").asText(),
+                        game.path("categoryName").asText(),
+                        MatchCategory.BASEBALL,
+                        gameDateTime,
+                        LocalDateTime.parse(game.path("gameDateTime").asText()).plusMinutes(240)
+                ));
+
+                log.info("✅ 저장 완료: {} vs {}", game.path("homeTeamName").asText(), game.path("awayTeamName").asText());
             }
-        } finally {
-            if (webDriver != null) {
-                try {
-                    webDriver.quit();
-                } catch (Exception e) {
-                    log.error("WebDriver quit 실패", e);
-                }
-            }
+
+        } catch (Exception e) {
+            log.error("JSON 파싱 중 오류 발생", e);
         }
     }
-
-    public List<String> getCrawlDate(LocalDateTime recentDate) {
-        LocalDateTime targetDate = LocalDateTime.now().plusWeeks(1);
-
-        List<String> dateList = new ArrayList<>();
-
-        LocalDateTime startDate = (recentDate != null) ? recentDate.plusDays(1) : LocalDateTime.now();
-
-        while (startDate.isBefore(targetDate) || startDate.isEqual(targetDate)) {
-            dateList.add(startDate.format(DATE_FORMATTER));
-            startDate = startDate.plusDays(1);
-        }
-
-        return dateList;
-    }
-
-    private void saveMatch(String date) {
-        for (WebElement league : getLeagueList()) {
-            confirmKboLeague(league, date);
-        }
-    }
-
-    private void confirmKboLeague(WebElement league, String date) {
-        if (getLeagueName(league).equals(KBO_NAME)) {
-            crawlMatch(league, date);
-        }
-    }
-
-    private void crawlMatch(WebElement league, String date) {
-        for (WebElement match : getMatchList(league)) {
-            List<WebElement> teamNames = getTeamNames(match);
-            List<WebElement> teamLogos = getTeamLogos(match);
-
-            log.info("{} {} {} {} {} {}" + BLANK + "{}", teamNames.get(0).getText(), getLogoImg(teamLogos.get(0)),
-                    teamNames.get(1).getText(), getLogoImg(teamLogos.get(1)), getPlace(match), date,
-                    getMatchTime(match));
-
-            save(teamNames.get(1).getText(), getLogoImg(teamLogos.get(1)), teamNames.get(0).getText(),
-                    getLogoImg(teamLogos.get(0)), getPlace(match), date + BLANK + getMatchTime(match));
-        }
-    }
-
-    private void save(String homeTeamName, String homeTeamLogo, String awayTeamName, String awayTeamLogo, String place,
-                      String startDate) {
-        this.matchService.save(MatchServiceRequest.createRequest(
-                homeTeamName,
-                homeTeamLogo,
-                awayTeamName,
-                awayTeamLogo,
-                place,
-                LeagueName.KBO.getName(),
-                MatchCategory.BASEBALL,
-                LocalDateTime.parse(startDate, TIME_FORMATTER),
-                LocalDateTime.parse(startDate, TIME_FORMATTER).plusMinutes(240)));
-    }
-
-    private List<WebElement> getLeagueList() {
-        return webDriver.findElements(By.className(LEAGUE_CLASS));
-    }
-
-    private String getLeagueName(WebElement league) {
-        return league.findElement(By.className(LEAGUE_NAME)).getText();
-    }
-
-    private List<WebElement> getMatchList(WebElement league) {
-        return league.findElements(By.className(MATCH_CLASS));
-    }
-
-    private String getMatchTime(WebElement match) {
-        return match.findElement(By.className(MATCH_TIME_CLASS)).getAttribute("innerText").replace("경기 시간\n", "");
-    }
-
-    private String getPlace(WebElement match) {
-        return match.findElement(By.className(MATCH_PLACE)).getAttribute("innerText").replace("경기장\n", "");
-    }
-
-    private List<WebElement> getTeamNames(WebElement team) {
-        return team.findElements(By.className(TEAM_NAME_CLASS));
-    }
-
-    private List<WebElement> getTeamLogos(WebElement team) {
-        return team.findElements(By.className(TEAM_LOGO_CLASS));
-    }
-
-    private String getLogoImg(WebElement logo) {
-        try {
-            return logo.findElement(By.tagName(IMG_TAG)).getAttribute(SRC_ATTR);
-        } catch (NoSuchElementException e) {
-            return null;
-        }
-    }
-
 }
