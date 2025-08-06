@@ -21,7 +21,7 @@ public class Scheduler {
     private final Job gameCrawlJob;
     private final JobLauncher jobLauncher;
 
-    @Scheduled(cron = "0 0 */2 * * *") // 매일 2시간 마다 실행
+    //@Scheduled(cron = "0 0 */2 * * *") // 매일 2시간 마다 실행
     public void newsCrawlJob() throws
             JobInstanceAlreadyCompleteException,
             JobExecutionAlreadyRunningException,
@@ -52,7 +52,7 @@ public class Scheduler {
     }
 
     // 게임 이벤트 크롤링 배치 코드
-    @Scheduled(cron = "0 0 23 * * *") // 매일 오후 11에 다음날에 노출될 게임 정보 크롤링 실행
+   // @Scheduled(cron = "0 0 23 * * *") // 매일 오후 11에 다음날에 노출될 게임 정보 크롤링 실행
     public void gameEventCrawl() throws JobInstanceAlreadyCompleteException,
             JobExecutionAlreadyRunningException,
             JobParametersInvalidException, JobRestartException {
